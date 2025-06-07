@@ -11,10 +11,17 @@ GOOGLE_SHEETS_ID = "17ZHn4wq0Ga36_qEY6Qdt8jxzCnrSe48GRK-OvqUO1HQ"
 PROJECT_ID = "xnwk-462111"
 DATASET_NAME = "src_googlesheets"
 TABLE_NAME = "transactions"
-TEMP_TABLE_NAME = "transactions_staging"
+TEMP_TABLE_NAME = "transactions_temp"
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+
+# Handle null values in Google Sheets
+def _normalize(value):
+    if isinstance(value, str):
+        return value.strip() or None
+    return value if value != "" else None
 
 
 @functions_framework.http
@@ -56,13 +63,13 @@ def ingest_transactions(request):
             if existing_version is None or str(version) != str(existing_version):
                 new_or_updated_rows.append({
                     "date": parsed_date,
-                    "asset_name": r["asset_name"],
-                    "asset_id": r["asset_id"],
+                    "asset_name": _normalize(r.get("asset_name")),
+                    "asset_id": _normalize(r.get("asset_id")),
                     "price": float(r["price"]),
                     "currency": r["currency"],
                     "amounts": int(r["amounts"]),
                     "strategy_name": r["strategy_name"],
-                    "strategy_details": r.get("strategy_details"),
+                    "strategy_details": _normalize(r.get("strategy_details")),
                     "version": version,
                 })
 
@@ -122,6 +129,10 @@ def ingest_transactions(request):
         """
         bq.query(merge_sql).result()
         logger.info("Merge completed")
+
+        bq.delete_table(temp_table_id, not_found_ok=True)
+        logger.info(f"Deleted temp table {temp_table_id}")
+
         return f"Upserted {len(new_or_updated_rows)} rows", 200
 
     except Exception as e:

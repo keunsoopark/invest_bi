@@ -2,9 +2,12 @@
 
 If you have any auth problem, run `gcloud auth application-default login`.
 
-## EDM
+In running dbt command, you would still have auth error message because some source tables are external tables based on Google Drive. Run this instead: `gcloud auth application-default login --scopes=https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/drive`.
 
-https://dbdiagram.io/d/investment-6842b873ba2a4ac57b224ea2
+## Data modeling
+
+EDM of source data: https://dbdiagram.io/d/investment-6842b873ba2a4ac57b224ea2
+
 
 ## Ingest
 
@@ -25,6 +28,7 @@ gcloud functions deploy ingest_transactions \
 ```
 
 Deployed function: https://europe-north1-xnwk-462111.cloudfunctions.net/ingest_transactions
+
 
 ### fx daily
 ```
