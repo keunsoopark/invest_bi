@@ -1,0 +1,44 @@
+[
+  {
+    "name": "asset_name",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "e.g., Tesla"
+  },
+  {
+    "name": "asset_id",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "e.g., TSLA"
+  },
+  {
+    "name": "main_class",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "e.g., stock, bond"
+  },
+  {
+    "name": "sub_class",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "e.g., etf, individual_stock"
+  },
+  {
+    "name": "sector",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "e.g., 조선"
+  },
+  {
+    "name": "region",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "e.g., Europe"
+  },
+  {
+    "name": "sub_region",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "e.g., Germany"
+  }
+]

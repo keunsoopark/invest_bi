@@ -1,0 +1,15 @@
+# IDE / Editor
+.idea
+.editorconfig
+.vscode
+.venv
+**/venv/
+
+# macOS
+__pycache__
+.DS_Store
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/

@@ -1,0 +1,56 @@
+[
+  {
+    "name": "date",
+    "type": "DATE",
+    "mode": "REQUIRED",
+    "description": "e.g., 2025-06-03"
+  },
+  {
+    "name": "asset_name",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "e.g., Tesla"
+  },
+  {
+    "name": "asset_id",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "e.g., TSLA"
+  },
+  {
+    "name": "price",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "e.g., 220"
+  },
+  {
+    "name": "currency",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "e.g., USD"
+  },
+  {
+    "name": "amounts",
+    "type": "INTEGER",
+    "mode": "REQUIRED",
+    "description": "e.g., 10"
+  },
+  {
+    "name": "strategy_name",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "e.g., 정적자산배분"
+  },
+  {
+    "name": "strategy_details",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "e.g., DCA since 25/04"
+  },
+  {
+    "name": "version",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "e.g., 1. If this is empty, it is a new record"
+  }
+]
