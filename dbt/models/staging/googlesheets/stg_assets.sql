@@ -1,22 +1,36 @@
-with source as (
+with assets as (
 
-    select * from {{ source('src_googlesheets', 'assets') }}
+    select * from {{ ref('base_assets') }}
 
 ),
 
-renamed as (
+fx as (
+
+    select * from {{ ref('stg_fx') }}
+
+),
+
+assets_in_nok as (
 
     select
-        asset_name,
-        asset_id,
-        main_class,
-        sub_class,
-        sector,
-        region,
-        sub_region
+        a.asset_name,
+        a.asset_id,
+        a.main_class,
+        a.sub_class,
+        a.sector,
+        a.region,
+        a.sub_region,
+        case
+            when a.currency = 'NOK' then a.price
+            when a.currency = 'USD' then a.price * f.usdnok
+            when a.currency = 'KRW' then a.price / f.nokkrw
+        end as price,
+        a.currency as original_currency,
+        a.updated_at
 
-    from source
+    from assets as a
+    left join fx as f on a.updated_at = f.date
 
 )
 
-select * from renamed
+select * from assets_in_nok

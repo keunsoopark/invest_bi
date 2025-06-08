@@ -7,7 +7,7 @@ with source as (
 renamed as (
 
     select
-        name
+        name as strategy_name
 
     from source
 

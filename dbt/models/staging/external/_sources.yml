@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: src_external
+    tables:
+      - name: fx
+        columns:
+          - name: date
+            data_type: date
+          - name: usdnok
+            data_type: float64
+          - name: nokkrw
+            data_type: float64
+          - name: row_num
+            data_type: int64

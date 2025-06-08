@@ -17,9 +17,15 @@ clean-targets:
 models:
   invest_bi:
     +materialized: view
-    stg:
+    staging:
 
-    int:
+    intermediate:
 
-    mart:
+    marts:
       +materialized: table
+      
+      facts:
+        +materialized: table
+
+      aggregates:
+        +materialized: view

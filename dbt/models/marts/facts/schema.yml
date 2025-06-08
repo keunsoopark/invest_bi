@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: fct_status
+    description: >
+      Investment status by asset and strategy, including holding amounts, cost, current balance, and average holding price.
+    columns:
+      - name: asset_name
+        description: Name of the asset.
+
+      - name: asset_id
+        description: Unique ID of the asset.
+
+      - name: strategy_name
+        description: Name of the investment strategy.
+
+      - name: strategy_details
+        description: Additional details or identifier for the strategy.
+
+      - name: holding_amounts
+        description: Total number of units held for the asset in the strategy.
+        tests:
+          - dbt_utils.expression_is_true:
+                expression: '>= 0'
+
+      - name: holding_sum
+        description: Total cost of the holding in original currency.
+
+      - name: balance
+        description: Current market value of the holding in NOK.
+        tests:
+          - dbt_utils.expression_is_true:
+                expression: '>= 0'
+
+      - name: average_holding_price
+        description: Average purchase price per unit in NOK, if available.
