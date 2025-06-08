@@ -40,5 +40,23 @@
     "type": "STRING",
     "mode": "NULLABLE",
     "description": "e.g., Germany"
+  },
+  {
+    "name": "price",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Price of asset"
+  },
+  {
+    "name": "currency",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Currency of price"
+  },
+  {
+    "name": "updated_at",
+    "type": "DATE",
+    "mode": "REQUIRED",
+    "description": "When price is updated"
   }
 ]
