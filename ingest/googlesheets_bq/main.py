@@ -17,11 +17,13 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-# Handle null values in Google Sheets
 def _normalize(value):
     if isinstance(value, str):
-        return value.strip() or None
-    return value if value != "" else None
+        value = value.strip()       # Remove leading/trailing whitespace from Google Sheets
+        return value if value else None
+    if value == "":                 # Handle empty cell in Google Sheets
+        return None
+    return value
 
 
 @functions_framework.http
@@ -44,8 +46,8 @@ def ingest_transactions(request):
                 SELECT
                     CONCAT(
                         CAST(date AS STRING), 
-                        asset_name, 
-                        FORMAT('%.2f', price), 
+                        TRIM(asset_name), 
+                        FORMAT('%.2f', price),
                         CAST(amounts AS STRING)
                     ) AS hash_key,
                     version
@@ -56,21 +58,23 @@ def ingest_transactions(request):
         new_or_updated_rows = []
         for r in rows:
             parsed_date = datetime.strptime(r["date"], "%Y/%m/%d").date().isoformat()
-            key = f"{parsed_date}{r['asset_name']}{float(r['price']):.2f}{r['amounts']}"
-            version = r.get("version")
-            existing_version = existing_rows.get(key)
+            parsed_asset_name = _normalize(r.get("asset_name"))
+            parsed_price = f"{r['price']:.2f}"
+            parsed_amounts = str(r["amounts"])
+            key = f"{parsed_date}{parsed_asset_name}{parsed_price}{parsed_amounts}"
 
-            if existing_version is None or str(version) != str(existing_version):
+            version = _normalize(r.get("version"))
+            if key not in existing_rows or str(version) != str(existing_rows.get(key)):
                 new_or_updated_rows.append({
                     "date": parsed_date,
-                    "asset_name": _normalize(r.get("asset_name")),
+                    "asset_name": parsed_asset_name,
                     "asset_id": _normalize(r.get("asset_id")),
                     "price": float(r["price"]),
-                    "currency": r["currency"],
+                    "currency": _normalize(r["currency"]),
                     "amounts": int(r["amounts"]),
-                    "strategy_name": r["strategy_name"],
+                    "strategy_name": _normalize(r["strategy_name"]),
                     "strategy_details": _normalize(r.get("strategy_details")),
-                    "version": version,
+                    "version": int(version),
                 })
 
         if not new_or_updated_rows:
@@ -88,14 +92,18 @@ def ingest_transactions(request):
                 bigquery.SchemaField("amounts", "INT64"),
                 bigquery.SchemaField("strategy_name", "STRING"),
                 bigquery.SchemaField("strategy_details", "STRING"),
-                bigquery.SchemaField("version", "STRING"),
+                bigquery.SchemaField("version", "INT64"),
             ],
             write_disposition="WRITE_TRUNCATE"
         )
 
         load_job = bq.load_table_from_json(new_or_updated_rows, temp_table_id, job_config=job_config)
         load_job.result()
-        logger.info(f"Loaded {len(new_or_updated_rows)} rows into staging table")
+
+        if load_job.errors:
+            logger.error(f"Load job had errors: {load_job.errors}")
+        else:
+            logger.info("Load job completed without errors")
 
         # MERGE into final table
         merge_sql = f"""
@@ -106,7 +114,7 @@ def ingest_transactions(request):
               T.asset_name = S.asset_name AND
               T.price = S.price AND
               T.amounts = S.amounts
-            WHEN MATCHED AND T.version != S.version THEN
+            WHEN MATCHED AND T.version IS DISTINCT FROM S.version THEN
               UPDATE SET
                 date = S.date,
                 asset_name = S.asset_name,

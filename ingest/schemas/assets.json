@@ -12,13 +12,13 @@
     "description": "e.g., TSLA"
   },
   {
-    "name": "main_class",
+    "name": "main_group",
     "type": "STRING",
     "mode": "REQUIRED",
     "description": "e.g., stock, bond"
   },
   {
-    "name": "sub_class",
+    "name": "sub_group",
     "type": "STRING",
     "mode": "NULLABLE",
     "description": "e.g., etf, individual_stock"

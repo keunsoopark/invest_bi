@@ -49,7 +49,7 @@
   },
   {
     "name": "version",
-    "type": "STRING",
+    "type": "INTEGER",
     "mode": "NULLABLE",
     "description": "e.g., 1. If this is empty, it is a new record"
   }
