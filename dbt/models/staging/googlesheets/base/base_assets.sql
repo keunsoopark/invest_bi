@@ -9,8 +9,8 @@ renamed as (
     select
         asset_name,
         asset_id,
-        main_class,
-        sub_class,
+        main_group,
+        sub_group,
         sector,
         region,
         sub_region,

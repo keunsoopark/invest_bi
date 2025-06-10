@@ -9,9 +9,9 @@ sources:
             data_type: string
           - name: asset_id
             data_type: string
-          - name: main_class
+          - name: main_group
             data_type: string
-          - name: sub_class
+          - name: sub_group
             data_type: string
           - name: sector
             data_type: string

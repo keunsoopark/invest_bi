@@ -1,6 +1,6 @@
-with holdings as (
+with purchase as (
 
-    select * from {{ ref('int_holdings') }}
+    select * from {{ ref('int_purchase') }}
 
 ),
 
@@ -10,21 +10,21 @@ assets as (
 
 ),
 
-holding_with_balance as (
+purchase_with_balance as (
     select
-        h.asset_name,
-        h.asset_id,
-        h.strategy_name,
-        h.strategy_details,
-        h.holding_amounts,
-        h.holding_sum,
+        p.asset_name,
+        p.asset_id,
+        p.strategy_name,
+        p.strategy_details,
+        p.purchase_amounts,
+        p.purchase_sum,
         case
-            when h.holding_amounts = 999999 then a.price
-            else a.price * h.holding_amounts
+            when p.purchase_amounts = 999999 then a.price
+            else a.price * p.purchase_amounts
         end as balance,
-        h.average_holding_price,
-    from holdings as h
-    left join assets as a on h.asset_name = a.asset_name
+        p.average_purchase_price,
+    from purchase as p
+    left join assets as a on p.asset_name = a.asset_name
 
 ),
 
@@ -34,10 +34,10 @@ invest_status as (
         asset_id,
         strategy_name,
         strategy_details,
-        holding_amounts,
-        holding_sum,
+        purchase_amounts,
+        purchase_sum,
         balance
-    from holding_with_balance
+    from purchase_with_balance
 )
 
 select * from invest_status

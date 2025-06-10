@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: stg_fx
+    description: ""
+    columns:
+      - name: date
+        data_type: date
+        description: ""
+        tests:
+            - not_null
+            - unique
+
+      - name: usdnok
+        data_type: float64
+        description: ""
+        tests:
+            - not_null
+
+      - name: nokkrw
+        data_type: float64
+        description: ""
+        tests:
+            - not_null
