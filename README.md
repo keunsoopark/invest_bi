@@ -46,3 +46,12 @@ gcloud functions deploy fx_daily \
 Deployed function: https://europe-north1-xnwk-462111.cloudfunctions.net/fx_daily
 
 
+## dbt
+
+### Useful commands
+
+Create model yaml file
+```
+dbt run-operation generate_model_yaml --args '{"model_names": ["stg_fx"]}'    
+```
+

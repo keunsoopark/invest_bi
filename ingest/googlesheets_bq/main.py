@@ -74,7 +74,7 @@ def ingest_transactions(request):
                     "amounts": int(r["amounts"]),
                     "strategy_name": _normalize(r["strategy_name"]),
                     "strategy_details": _normalize(r.get("strategy_details")),
-                    "version": int(version),
+                    "version": int(version) if version is not None else None
                 })
 
         if not new_or_updated_rows:
