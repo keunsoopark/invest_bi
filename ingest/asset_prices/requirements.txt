@@ -1,0 +1,6 @@
+yfinance==0.2.63
+google-cloud-bigquery==3.17.2
+functions-framework==3.4.0
+requests==2.31.0
+google-auth==2.40.3
+gspread==6.2.1

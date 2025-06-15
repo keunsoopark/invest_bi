@@ -46,6 +46,30 @@ gcloud functions deploy fx_daily \
 Deployed function: https://europe-north1-xnwk-462111.cloudfunctions.net/fx_daily
 
 
+### Asset prices daily
+
+> [!NOTE]  
+> Cloud Run cannot read data in Google Sheets via BigQuery external table, although its service account has all IAM permissions for Google Drive and BigQuery, because Google Drive access requires OAuth scope - like user consent when we use user account to access to Google Drive - https://cloud.google.com/bigquery/docs/external-data-drive?utm_source=chatgpt.com#enable-google-drive
+> That is why this solution needs to access to Google sheets directly to read `assets` sheet.
+
+To deploy it to Google Cloud Run Function:
+
+```
+gcloud functions deploy asset_prices_daily \
+  --gen2 \
+  --runtime python311 \
+  --region europe-north1 \
+  --entry-point asset_prices_daily \
+  --source . \
+  --trigger-http \
+  --allow-unauthenticated \
+  --service-account ingest-transactions@xnwk-462111.iam.gserviceaccount.com \
+  --timeout=180
+```
+
+Deployed function: https://europe-north1-xnwk-462111.cloudfunctions.net/asset_prices_daily
+
+
 ## dbt
 
 ### Useful commands

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "asset_name",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "e.g., Tesla"
+  },
+  {
+    "name": "asset_id",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "e.g., TSLA"
+  },
+  {
+    "name": "balance",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Total balance of asset"
+  },
+  {
+    "name": "currency",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Currency of price"
+  },
+  {
+    "name": "updated_at",
+    "type": "DATE",
+    "mode": "REQUIRED",
+    "description": "When price is updated"
+  }
+]

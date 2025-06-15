@@ -72,3 +72,7 @@ sources:
                 - asset_name
                 - price
                 - amounts
+
+      - name: asset_prices_manual
+
+      - name: balance_manual

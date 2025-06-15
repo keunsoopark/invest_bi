@@ -18,3 +18,5 @@ sources:
             data_type: float64
             tests:
               - not_null
+
+      - name: asset_prices
