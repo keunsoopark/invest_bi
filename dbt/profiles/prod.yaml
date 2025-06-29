@@ -5,7 +5,8 @@ invest_bi:
       job_execution_timeout_seconds: 300
       job_retries: 1
       location: europe-north1
-      method: oauth
+      method: service-account
+      keyfile: ./gcp_key.json
       priority: interactive
       project: xnwk-462111
       threads: 4
