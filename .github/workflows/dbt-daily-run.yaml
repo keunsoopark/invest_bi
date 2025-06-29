@@ -27,6 +27,6 @@ jobs:
         run: dbt deps
 
       - name: Run dbt
-        run: dbt run
+        run: dbt run --profiles-dir ./profiles
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_FOR_DBT }}
