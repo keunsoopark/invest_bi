@@ -27,7 +27,8 @@ jobs:
         run: dbt deps
       
       - name: Write service account key
-        run: echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY_FOR_DBT }}" > gcp_key.json
+        run: |
+          echo '${{ secrets.GCP_SERVICE_ACCOUNT_KEY_FOR_DBT }}' > gcp_key.json
 
       - name: Run dbt
         run: dbt run --profiles-dir ./profiles
