@@ -13,7 +13,6 @@ assets as (
 status_by_assets as (
 
     select
-        date,
         asset_name,
         case
             when COUNTIF(purchase_amounts = 999999) > 0 then 999999
@@ -26,6 +25,7 @@ status_by_assets as (
                 This assumption is true for the same asset, but not true for the same strategy.
             #}
             when countif(purchase_amounts = 999999) > 0 then avg(balance)
+            when COUNTIF(balance = 999999) > 0 then 999999
             else SUM(balance)
         end as balance,
         CASE
@@ -34,14 +34,12 @@ status_by_assets as (
         END as average_purchase_price
     from invest_status
     group by
-        date,
         asset_name
 ),
 
 status_by_assets_agg as (
 
     select
-        date,
         asset_name,
         purchase_amounts,
         purchase_sum,
@@ -60,7 +58,6 @@ status_by_assets_agg as (
 status_by_assets_agg_enriched as (
 
     select
-        sba.date,
         sba.asset_name,
         a.asset_id,
         a.main_group,
@@ -73,8 +70,7 @@ status_by_assets_agg_enriched as (
         sba.balance,
         sba.profit,
         sba.profit_percentage,
-        sba.average_purchase_price,
-        a.currency
+        sba.average_purchase_price
     from status_by_assets_agg as sba
     left join assets as a on sba.asset_name = a.asset_name
 

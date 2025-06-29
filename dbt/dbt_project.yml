@@ -17,6 +17,10 @@ clean-targets:
 models:
   invest_bi:
     +materialized: view
+    +persist_docs:
+      relation: true
+      columns: true
+
     staging:
 
     intermediate:
@@ -26,6 +30,3 @@ models:
       
       facts:
         +materialized: table
-
-      aggregates:
-        +materialized: view

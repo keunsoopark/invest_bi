@@ -1,0 +1,184 @@
+version: 2
+
+models:
+  - name: fct_status
+    description: >
+      Investment status by asset and strategy, including purchase amounts, cost, current balance, and average purchase price.
+    columns:
+      - name: date
+        description: Date of the investment status record.
+        tests:
+          - not_null
+
+      - name: asset_name
+        description: Name of the asset.
+        tests:
+          - not_null
+
+      - name: asset_id
+        description: Unique ID of the asset.
+
+      - name: strategy_name
+        description: Name of the investment strategy.
+
+      - name: strategy_details
+        description: Additional details or identifier for the strategy.
+
+      - name: purchase_amounts
+        description: Total number of units held for the asset in the strategy.
+        tests:
+          - dbt_utils.expression_is_true:
+                expression: '>= 0'
+
+      - name: purchase_sum
+        description: Total cost of the purchase in original currency.
+
+      - name: balance
+        description: Current market value of the purchase in NOK.
+        tests:
+          - dbt_utils.expression_is_true:
+                expression: '>= 0'
+
+      - name: average_purchase_price
+        description: Average purchase price per unit in NOK, if available.
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - date
+            - asset_name
+            - strategy_name
+            - strategy_details
+
+  - name: fct_properties
+    columns:
+      - name: month
+        data_type: string
+      - name: property_name
+        data_type: string
+      - name: property_value
+        data_type: float64
+      - name: debt
+        data_type: float64
+      - name: property_equity
+        data_type: float64
+        description: 자본. 순자산
+      - name: debt_ratio
+        data_type: float64
+        description: 부채 비율
+      - name: capital_gain
+        data_type: float64
+        description: 자본 이득. 자산 가치 증가
+      - name: tenant
+        data_type: string
+      - name: monthly_rent
+        data_type: float64
+      - name: loan_payback
+        data_type: float64
+      - name: loan_cost
+        data_type: float64
+      - name: loan_cashflow
+        data_type: float64
+        description: 원리금 상환 + 이자 비용
+      - name: felleskostnad
+        data_type: float64
+      - name: garbage_cost
+        data_type: float64
+      - name: forsikring_cost
+        data_type: float64
+      - name: water_cost
+        data_type: float64
+      - name: electricity_cost
+        data_type: float64
+      - name: internet_cost
+        data_type: float64
+      - name: rent_mgmt_cost
+        data_type: float64
+      - name: depreciation_cost
+        data_type: float64
+      - name: total_cost
+        data_type: float64
+        description: 총 비용. 대출 이자 비용 + 관리비 + 감가상각
+      - name: total_cash_outflow
+        data_type: float64
+        description: 총 현금 유출. 대출 원리금 상환 + total_cost
+      - name: rent_net_income
+        data_type: float64
+        description: 순 임대 수익. 월세 - total_cost
+      - name: total_cashflow
+        data_type: float64
+        description: 총 현금 흐름. 월세 - total_cash_outflow = 월세 - total_cost - 대출 원리금 상환
+      - name: rent_nominal_yield
+        data_type: float64
+        description: 명목 임대 수익률. 년세 / 집값
+      - name: rent_net_yield
+        data_type: float64
+        description: 순 임대 수익률. rent_net_income * 12 / 집값
+      - name: rent_nominal_equity_yield
+        data_type: float64
+        description: 명목 자본 수익률. 년세 / 자본
+      - name: rent_net_equity_yield
+        data_type: float64
+        description: 순 자본 수익률. rent_net_income * 12 / 자본
+      - name: transactions
+        data_type: float64
+        description: 한달에 이 집에 들어간 비용 총합. 추가로 번 돈있으면 그것도 여기에 들어감
+
+  - name: fct_private_statement
+    description: ""
+    columns:
+      - name: month
+        data_type: string
+        description: ""
+
+      - name: month_end_date
+        data_type: date
+        description: ""
+
+      - name: reserve_balance
+        data_type: float64
+        description: "Balance in reserve account"
+
+      - name: public_investment_balance
+        data_type: float64
+        description: "Balance of publicly opened investment account via @litenvannmelon"
+
+      - name: usd_cash
+        data_type: float64
+        description: "USD cash. Currently USDT + SGOV"
+
+      - name: crypto
+        data_type: float64
+        description: "Total crypto balance"
+
+      - name: no_invest_ready_balance
+        data_type: float64
+        description: "Investment ready balance in Norway. Currently 김프 짤짤이"
+
+      - name: korea_balance
+        data_type: float64
+        description: "Total balance in Korea. Sum of all accounts in Korea"
+
+      - name: krw_cash
+        data_type: float64
+        description: "KRW cash"
+
+      - name: loan_to_mu
+        data_type: float64
+        description: "Loan to MU from KP"
+
+      - name: private_balance
+        data_type: float64
+        description: "Sum of all above. Total private balance of KP"
+
+      - name: total_mu_balance
+        data_type: float64
+        description: "Total balance of MireUniverse"
+
+      - name: business_operation_buffer
+        data_type: float64
+        description: "Business + KP operation buffer. Currently, 100 000 + MU operation + Loan from MU to MP"
+
+      - name: financial_invest_balance
+        data_type: float64
+        description: "Total investable balance = private_balance + total_mu_balance - business_operation_buffer"

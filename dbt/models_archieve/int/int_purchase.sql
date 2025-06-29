@@ -1,6 +1,13 @@
 with transactions as (
 
-    select * from {{ ref('stg_transactions') }}
+    select 
+        date,
+        asset_name,
+        strategy_name,
+        strategy_details,
+        amounts,
+        price
+    from {{ ref('int_transactions_in_nok') }}
 
 ),
 

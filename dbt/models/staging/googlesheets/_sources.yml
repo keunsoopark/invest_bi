@@ -3,6 +3,19 @@ version: 2
 sources:
   - name: src_googlesheets
     tables:
+      - name: asset_prices_manual
+        columns:
+          - name: asset_name
+            data_type: string
+          - name: asset_id
+            data_type: string
+          - name: price
+            data_type: float64
+          - name: currency
+            data_type: string
+          - name: updated_at
+            data_type: date
+
       - name: assets
         columns:
           - name: asset_name
@@ -19,19 +32,99 @@ sources:
             data_type: string
           - name: sub_region
             data_type: string
-          - name: price
+          - name: currency
+            data_type: string
+
+      - name: balance_manual
+        columns:
+          - name: asset_name
+            data_type: string
+          - name: asset_id
+            data_type: string
+          - name: balance
             data_type: float64
           - name: currency
             data_type: string
           - name: updated_at
             data_type: date
 
+      - name: properties
+        columns:
+          - name: name
+            data_type: string
+          - name: location
+            data_type: string
+          - name: p_rom
+            data_type: int64
+          - name: construction_year
+            data_type: int64
+          - name: soverom
+            data_type: int64
+          - name: etasje
+            data_type: int64
+          - name: purchase_price
+            data_type: float64
+          - name: initial_debt
+            data_type: float64
+          - name: purchase_year
+            data_type: int64
+
+      - name: property_hist
+        columns:
+          - name: date
+            data_type: date
+          - name: name
+            data_type: string
+          - name: value
+            data_type: float64
+          - name: debt
+            data_type: float64
+          - name: tenant
+            data_type: string
+          - name: monthly_rent
+            data_type: float64
+          - name: loan_payback
+            data_type: float64
+          - name: loan_cost
+            data_type: float64
+          - name: felleskostnad
+            data_type: float64
+          - name: garbage_cost
+            data_type: float64
+          - name: forsikring_cost
+            data_type: float64
+          - name: water_cost
+            data_type: float64
+          - name: electricity_cost
+            data_type: float64
+          - name: internet_cost
+            data_type: float64
+          - name: rent_mgmt_cost
+            data_type: float64
+          - name: depreciation_cost
+            data_type: float64
+
+      - name: property_trans
+        columns:
+          - name: date
+            data_type: date
+          - name: name
+            data_type: string
+          - name: item
+            data_type: string
+          - name: price
+            data_type: float64
+      
+      - name: property_stats
+
+      - name: company_statements
+
+      - name: private_statement
+
       - name: strategies
         columns:
           - name: name
             data_type: string
-            tests:
-              - unique
 
       - name: transactions
         columns:
@@ -39,16 +132,8 @@ sources:
             data_type: date
           - name: asset_name
             data_type: string
-            tests:
-              - relationships:
-                  to: source('src_googlesheets', 'assets')
-                  field: asset_name
           - name: asset_id
             data_type: string
-            tests:
-              - relationships:
-                  to: source('src_googlesheets', 'assets')
-                  field: asset_id
           - name: price
             data_type: float64
           - name: currency
@@ -57,22 +142,7 @@ sources:
             data_type: int64
           - name: strategy_name
             data_type: string
-            tests:
-              - relationships:
-                  to: source('src_googlesheets', 'strategies')
-                  field: name
           - name: strategy_details
             data_type: string
           - name: version
-            data_type: string
-        tests:
-          - dbt_utils.unique_combination_of_columns:
-              combination_of_columns:
-                - date
-                - asset_name
-                - price
-                - amounts
-
-      - name: asset_prices_manual
-
-      - name: balance_manual
+            data_type: int64

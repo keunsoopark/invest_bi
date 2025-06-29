@@ -1,43 +1,31 @@
 with purchase as (
-
-    select * from {{ ref('int_purchase') }}
-
+    select *
+    from {{ ref('fct_purchase') }} p
 ),
 
-assets as (
-
-    select * from {{ ref('stg_assets') }}
-
+balance as (
+    select *
+    from {{ ref('fct_balance') }} b
 ),
 
-purchase_with_balance as (
+invest_status as (
     select
+        p.date,
         p.asset_name,
-        p.asset_id,
+        b.asset_id,
         p.strategy_name,
         p.strategy_details,
         p.purchase_amounts,
         p.purchase_sum,
         case
-            when p.purchase_amounts = 999999 then a.price
-            else a.price * p.purchase_amounts
+            when p.purchase_amounts = 999999 then b.balance
+            else b.asset_price * p.purchase_amounts
         end as balance,
-        p.average_purchase_price,
+        p.average_purchase_price
     from purchase as p
-    left join assets as a on p.asset_name = a.asset_name
-
-),
-
-invest_status as (
-    select
-        asset_name,
-        asset_id,
-        strategy_name,
-        strategy_details,
-        purchase_amounts,
-        purchase_sum,
-        balance
-    from purchase_with_balance
+    left join balance as b 
+        on p.date = b.date
+        and p.asset_name = b.asset_name
 )
 
 select * from invest_status

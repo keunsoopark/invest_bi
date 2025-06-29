@@ -7,26 +7,23 @@ with status_by_assets as (
 status_by_asset_groups as (
 
     select
-        date,
         main_group as asset_main_group,
         sum(purchase_sum) as purchase_sum,
         sum(balance) as balance,
         sum(profit) as profit
     from status_by_assets
     group by
-        date,
         main_group
 
 ),
 
 status_by_asset_groups_agg as(
 
-    select
-        date,
+    select 
         asset_main_group,
         purchase_sum,
         balance,
-        balance / SUM(balance) OVER (PARTITION BY date) * 100 AS balance_percentage,
+        balance / sum(balance) over () * 100 as balance_percentage,
         profit,
         case
             when purchase_sum = 0 then null

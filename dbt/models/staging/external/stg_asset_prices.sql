@@ -7,11 +7,11 @@ with source as (
 renamed as (
 
     select
+        date,
         asset_name,
         asset_id,
         price,
-        currency,
-        date
+        currency
 
     from source
 
