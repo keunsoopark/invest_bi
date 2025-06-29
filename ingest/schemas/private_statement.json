@@ -1,0 +1,26 @@
+[  
+  {
+    "name": "month",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "e.g., 2025-06"
+  },
+  {
+    "name": "reserve_balance",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Balance(NOK) in reserve account"
+  },
+  {
+    "name": "public_investment_balance",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Balance(NOK) of publicly opened investment account via @litenvannmelon"
+  },
+  {
+    "name": "korea_balance",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Balance in all accounts in Korea. In KRW."
+  }
+]

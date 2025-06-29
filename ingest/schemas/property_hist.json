@@ -1,0 +1,104 @@
+[  
+  {
+    "name": "date",
+    "type": "DATE",
+    "mode": "REQUIRED",
+    "description": "e.g., 2025-06-03"
+  },
+  {
+    "name": "name",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Name of property, e.g., Drammen01"
+  },
+  {
+    "name": "value",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Monthly updated property value. From Rorosbank."
+  },
+  {
+    "name": "debt",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Monthly updated the remaining debt on the property."
+  },
+  {
+    "name": "tenant",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Current tenant name. e.g., Espen"
+  },
+  {
+    "name": "monthly_rent",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Current monthly rent."
+  },
+  {
+    "name": "loan_payback",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Monthly avdrag payback"
+  },
+  {
+    "name": "loan_cost",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Monthly cost on the loan. Interest + fees"
+  },
+  {
+    "name": "interest_rate",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Interest rate on the loan. e.g., 0.025 for 2.5%"
+  },
+  {
+    "name": "felleskostnad",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "felleskostnad to sameiet"
+  },
+  {
+    "name": "garbage_cost",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Cost for garbage collection"
+  },
+  {
+    "name": "forsikring_cost",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Cost for insurance"
+  },
+  {
+    "name": "water_cost",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Cost for water management"
+  },
+  {
+    "name": "electricity_cost",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Cost for electricity"
+  },
+  {
+    "name": "internet_cost",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Cost for internet subscription"
+  },
+  {
+    "name": "rent_mgmt_cost",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Cost for rent management. Fees to Krogsveen or Husleie"
+  },
+  {
+    "name": "depreciation_cost",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Cost for monthly depreciation"
+  }
+]

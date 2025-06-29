@@ -1,0 +1,56 @@
+[
+  {
+    "name": "name",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Name of property, e.g., Drammen01"
+  },
+  {
+    "name": "location",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Location of property, e.g., Drammen"
+  },
+  {
+    "name": "p_rom",
+    "type": "INTEGER",
+    "mode": "REQUIRED",
+    "description": "P rom in m2"
+  },
+  {
+    "name": "construction_year",
+    "type": "INTEGER",
+    "mode": "REQUIRED",
+    "description": "Year the property was constructed."
+  },
+  {
+    "name": "soverom",
+    "type": "INTEGER",
+    "mode": "REQUIRED",
+    "description": "Number of soverom."
+  },
+  {
+    "name": "etasje",
+    "type": "INTEGER",
+    "mode": "REQUIRED",
+    "description": "Which floor the apartment is on."
+  },
+  {
+    "name": "purchase_price",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Purchase price of the property."
+  },
+  {
+    "name": "initial_debt",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Initial debt amount for the property."
+  },
+  {
+    "name": "purchase_year",
+    "type": "INTEGER",
+    "mode": "REQUIRED",
+    "description": "Year the property was purchased."
+  }
+]

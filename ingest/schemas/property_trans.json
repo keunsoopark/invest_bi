@@ -1,0 +1,26 @@
+[
+  {
+    "name": "date",
+    "type": "DATE",
+    "mode": "REQUIRED",
+    "description": "e.g., 2025-06-03"
+  },
+  {
+    "name": "name",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Name of property, e.g., Drammen01"
+  },
+  {
+    "name": "item",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Transaction item, e.g., 'rent', 'maintenance', 'insurance'"
+  },
+  {
+    "name": "price",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Price of the transaction."
+  }
+]

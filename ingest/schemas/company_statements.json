@@ -1,0 +1,26 @@
+[  
+  {
+    "name": "month",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "e.g., 2025-06"
+  },
+  {
+    "name": "company",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "MU for MireUniverse, MP for MirePlay"
+  },
+  {
+    "name": "item",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Item for value, e.g., 'operation balance', 'KLP balance'"
+  },
+  {
+    "name": "value",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Value for item in NOK"
+  }
+]

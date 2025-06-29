@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
 import yfinance as yf
-from google.auth.transport.requests import AuthorizedSession
+import pandas as pd
+
 
 def main():
-    asset_id = "AAPL"
-    candidate_date = datetime.strptime("2025-06-09", "%Y-%m-%d").date()
+    asset_id = "QLD"
+    candidate_date = datetime.strptime("2025-06-13", "%Y-%m-%d").date()
 
     ticker = yf.Ticker(asset_id)
     hist = ticker.history(start=str(candidate_date), end=str(candidate_date + timedelta(days=1)))
@@ -12,6 +13,9 @@ def main():
     print(ticker)
     print(type(hist))
     print(hist)
+    close_price = hist["Close"].iloc[0] if not hist.empty else None
+    print(pd.isna(close_price))
+    print(close_price)
     print(hist.index[0].date())
     print(hist.index[0].isoformat())
 

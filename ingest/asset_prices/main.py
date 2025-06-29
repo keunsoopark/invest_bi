@@ -32,11 +32,6 @@ ASSET_PRICES_SCHEMA = [
     bigquery.SchemaField("price", "FLOAT"),
     bigquery.SchemaField("currency", "STRING")
 ]
-INACTIVE_ASSET_IDS_QUERY = f"""
-    SELECT DISTINCT asset_id
-    FROM `{PROJECT_ID}.marts_facts.fct_status`
-    WHERE purchase_amounts < 1 OR purchase_amounts = 999999
-"""
 
 @functions_framework.http
 def asset_prices_daily(request):
@@ -47,6 +42,18 @@ def asset_prices_daily(request):
             date_obj = datetime.strptime(target_date, "%Y-%m-%d").date()
         else:
             date_obj = (datetime.today() - timedelta(days=1)).date()
+
+        logger.info(f"Processing asset prices for date: {date_obj}")
+
+        inactive_asset_ids_query = f"""
+            select distinct asset_id
+            from (
+                SELECT date, asset_id, sum(purchase_amounts) as total_purchase_amounts
+                FROM `{PROJECT_ID}.marts_facts.fct_status`
+                group by date, asset_id)
+            WHERE date = DATE('{date_obj.isoformat()}')
+                AND (total_purchase_amounts < 1 OR total_purchase_amounts = 999999)
+        """
 
         # Read Google Sheets
         try:
@@ -64,7 +71,7 @@ def asset_prices_daily(request):
         try:
             excluded_asset_ids = {
                 row["asset_id"]
-                for row in bq.query(INACTIVE_ASSET_IDS_QUERY).result()
+                for row in bq.query(inactive_asset_ids_query).result()
                 if row["asset_id"]
             }
             logger.info(f"Excluded asset_id count: {len(excluded_asset_ids)}")
