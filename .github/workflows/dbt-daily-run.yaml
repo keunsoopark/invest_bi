@@ -1,4 +1,4 @@
-name: dbt Daily Run
+name: dbt daily run
 
 on:
   workflow_dispatch:
@@ -8,14 +8,25 @@ on:
 jobs:
   run-dbt:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./dbt
+
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      - run: cd dbt
-      - run: pip install dbt-bigquery
-      - run: dbt deps
-      - run: dbt run
+
+      - name: Install dbt-bigquery
+        run: pip install dbt-bigquery
+
+      - name: Install dbt dependencies
+        run: dbt deps
+
+      - name: Run dbt
+        run: dbt run
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY_FOR_DBT }}
