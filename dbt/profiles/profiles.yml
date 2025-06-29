@@ -6,7 +6,7 @@ invest_bi:
       job_retries: 1
       location: europe-north1
       method: service-account
-      keyfile: ./gcp_key.json
+      keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS') }}"
       priority: interactive
       project: xnwk-462111
       threads: 4
