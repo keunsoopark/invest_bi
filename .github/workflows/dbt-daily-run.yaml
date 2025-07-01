@@ -3,7 +3,7 @@ name: dbt daily run
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 4 * * *'  # Runs every day at 05:00 UTC
+    - cron: '0 4 * * *'  # Runs every day at 04:00 UTC
 
 jobs:
   run-dbt:
