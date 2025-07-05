@@ -37,7 +37,8 @@ private_statement_enriched as (
         f.krw_cash,
         mu.debt_from_kp as loan_to_mu,
         mu.operation_balance + mu.reserve_balance + mu.folkeinvestering_balance + mu.klp_balance - mu.debt_from_kp + mu.debt_to_mp as total_mu_balance,
-        mu.business_operation_buffer
+        mu.business_operation_buffer,
+        ps.no_debit_spend + ps.no_credit_spend + ps.kr_debit_spend as personal_spending
     from private_statement ps
     left join mu_statement mu on ps.month = mu.month
     left join fct_balance_selected f on ps.month_end_date = f.date

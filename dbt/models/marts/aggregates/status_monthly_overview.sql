@@ -96,7 +96,8 @@ status_monthly as (
         s.finance_profit,
         s.finance_profit_rate,
         s.finance_monthly_profit,
-        s.finance_yearly_profit
+        s.finance_yearly_profit,
+        s.finance_balance - LAG(s.finance_balance) OVER (ORDER BY s.month_end_date) - s.finance_monthly_profit AS saving
     from status_properties p
     inner join status_asset_groups_agg2 s
         on p.month_end_date = s.month_end_date

@@ -141,7 +141,7 @@ def ingest_transactions(request):
         bq.delete_table(temp_table_id, not_found_ok=True)
         logger.info(f"Deleted temp table {temp_table_id}")
 
-        return f"Upserted {len(new_or_updated_rows)} rows", 200
+        return f"{len(new_or_updated_rows)} new rows are detected", 200
 
     except Exception as e:
         logger.error("Exception occurred:\n%s", traceback.format_exc())

@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: status_by_assets
+    description: "Asset status including purchase_sum, balance, and profit"
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "ABS(profit - (balance - purchase_sum)) <= 1"
+
+  - name: status_by_asset_groups
+    description: "Asset status including purchase_sum, balance, and profit"
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "ABS(profit - (balance - purchase_sum)) <= 1"

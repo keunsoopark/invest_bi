@@ -4,12 +4,12 @@ FROM (
     SUM(balance) AS sum_assets
   FROM {{ ref('status_by_assets') }}
 ) a
-JOIN (
+CROSS JOIN (
   SELECT
     SUM(balance) AS sum_groups
   FROM {{ ref('status_by_asset_groups') }}
 ) b
-JOIN (
+CROSS JOIN (
   SELECT
     SUM(balance) AS sum_strategies
   FROM {{ ref('status_by_strategies') }}

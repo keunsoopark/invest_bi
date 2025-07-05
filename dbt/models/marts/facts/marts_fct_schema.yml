@@ -182,3 +182,9 @@ models:
       - name: financial_invest_balance
         data_type: float64
         description: "Total investable balance = private_balance + total_mu_balance - business_operation_buffer"
+
+sources:
+  - name: marts_facts_test_fixtures
+    schema: marts_facts
+    tables:
+      - name: fct_status_snapshot_2025_07_01

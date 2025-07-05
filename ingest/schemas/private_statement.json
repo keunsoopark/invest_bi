@@ -22,5 +22,23 @@
     "type": "FLOAT",
     "mode": "REQUIRED",
     "description": "Balance in all accounts in Korea. In KRW."
+  },
+  {
+    "name": "no_debit_spend",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Spending from debit account in Norway. Currently, Nordea account"
+  },
+  {
+    "name": "no_credit_spend",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Spending from credit account in Norway. Currently, Amex"
+  },
+  {
+    "name": "kr_debit_spend",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Spending from debit account in Korea. Currently, Woori account"
   }
 ]
