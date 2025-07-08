@@ -78,4 +78,3 @@ Create model yaml file
 ```
 dbt run-operation generate_model_yaml --args '{"model_names": ["stg_fx"]}'    
 ```
-

@@ -25,9 +25,11 @@ seed_data AS (
   SELECT *
   FROM {{ this }}
   WHERE date = (SELECT MAX(date) FROM {{ this }})
+    AND asset_name NOT IN (
+      SELECT asset_name FROM source_data
+    )
   {% else %}
-  SELECT *
-  FROM source_data
+  SELECT * FROM {{ this }} WHERE FALSE  -- ensures empty result in full-refresh
   {% endif %}
 ),
 

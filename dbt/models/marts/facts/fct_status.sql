@@ -8,6 +8,11 @@ balance as (
     from {{ ref('fct_balance') }} b
 ),
 
+assets as (
+    select *
+    from {{ ref('stg_assets') }}
+),
+
 invest_status as (
     select
         p.date,
@@ -26,6 +31,19 @@ invest_status as (
     left join balance as b 
         on p.date = b.date
         and p.asset_name = b.asset_name
+),
+
+invest_status_enriched as (
+    select i.*,
+        a.main_group,
+        a.sub_group,
+        a.sector,
+        a.region,
+        a.sub_region,
+        a.currency
+    from invest_status i
+    left join assets a
+    on i.asset_name = a.asset_name
 )
 
-select * from invest_status
+select * from invest_status_enriched
