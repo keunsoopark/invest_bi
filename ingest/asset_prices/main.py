@@ -42,7 +42,6 @@ def asset_prices_daily(request):
             date_obj = datetime.strptime(target_date, "%Y-%m-%d").date()
         else:
             date_obj = (datetime.today() - timedelta(days=1)).date()
-
         logger.info(f"Processing asset prices for date: {date_obj}")
 
         # Asset ids which are active in balance based on fct_status table
@@ -77,30 +76,34 @@ def asset_prices_daily(request):
 
         # Fetch active asset_ids
         bq = bigquery.Client()
-        try:
-            active_asset_ids = {
-                row["asset_id"]
-                for row in bq.query(active_asset_ids_query).result()
-                if row["asset_id"]
-            }
-            logger.info(f"Active asset_id count on {date_obj}: {len(active_asset_ids)}")
+        if request_json.get("asset_ids"):
+            active_asset_ids = set(request_json.get("asset_ids"))
+            logger.info(f"Requested asset_id filter: {active_asset_ids}")
+        else:
+            try:
+                active_asset_ids = {
+                    row["asset_id"]
+                    for row in bq.query(active_asset_ids_query).result()
+                    if row["asset_id"]
+                }
+                logger.info(f"Active asset_id count on {date_obj}: {len(active_asset_ids)}")
 
-            newly_traded_asset_names = {
-                row["asset_name"]
-                for row in bq.query(newly_traded_asset_names_query).result()
-                if row["asset_name"]
-            }
-            newly_traded_asset_ids = {
-                row["asset_id"]
-                for row in assets
-                if row.get("asset_name") in newly_traded_asset_names and row.get("asset_id")
-            }
-            logger.info(f"Newly traded asset_id count on {date_obj}: {len(newly_traded_asset_ids)}")
+                newly_traded_asset_names = {
+                    row["asset_name"]
+                    for row in bq.query(newly_traded_asset_names_query).result()
+                    if row["asset_name"]
+                }
+                newly_traded_asset_ids = {
+                    row["asset_id"]
+                    for row in assets
+                    if row.get("asset_name") in newly_traded_asset_names and row.get("asset_id")
+                }
+                logger.info(f"Newly traded asset_id count on {date_obj}: {len(newly_traded_asset_ids)}")
 
-            active_asset_ids = active_asset_ids.union(newly_traded_asset_ids)
-        except Exception:
-            logger.error("Failed to fetch excluded asset_ids:\n%s", traceback.format_exc())
-            return "Failed to fetch exclusion list", 500
+                active_asset_ids = active_asset_ids.union(newly_traded_asset_ids)
+            except Exception:
+                logger.error("Failed to fetch excluded asset_ids:\n%s", traceback.format_exc())
+                return "Failed to fetch exclusion list", 500
 
         # Select active assets
         assets = [row for row in assets if row.get("asset_id") in active_asset_ids]

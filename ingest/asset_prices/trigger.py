@@ -5,8 +5,8 @@ import time
 API_URL = "https://europe-north1-xnwk-462111.cloudfunctions.net/asset_prices_daily"
 
 # Date range
-start_date = datetime.date(2025, 2, 28)
-end_date = datetime.date(2025, 4, 23)
+start_date = datetime.date(2024, 8, 10)
+end_date = datetime.date(2025, 2, 27)
 
 # Loop through each date
 current_date = start_date
