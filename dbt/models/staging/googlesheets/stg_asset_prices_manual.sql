@@ -7,8 +7,8 @@ with source as (
 renamed as (
 
     select
-        asset_name,
-        asset_id,
+        TRIM(asset_name) as asset_name,
+        TRIM(asset_id) as asset_id,
         price,
         currency,
         updated_at as date

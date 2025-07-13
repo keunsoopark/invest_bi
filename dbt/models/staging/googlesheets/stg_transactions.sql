@@ -8,13 +8,13 @@ renamed as (
 
     select
         date,
-        asset_name,
-        asset_id,
+        TRIM(asset_name) as asset_name,
+        TRIM(asset_id) as asset_id,
         price,
         currency,
         amounts,
         strategy_name,
-        strategy_details,
+        TRIM(strategy_details) as strategy_details,
         version as transaction_version
 
     from source

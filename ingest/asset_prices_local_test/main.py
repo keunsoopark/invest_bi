@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def main():
-    asset_id = "TQQQ"
+    asset_id = "0P00000MY5.IR"
     candidate_date = datetime.strptime("2025-04-04", "%Y-%m-%d").date()
 
     ticker = yf.Ticker(asset_id)
