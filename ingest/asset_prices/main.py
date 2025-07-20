@@ -98,6 +98,10 @@ def asset_prices_daily(request):
                     for row in assets
                     if row.get("asset_name") in newly_traded_asset_names and row.get("asset_id")
                 }
+
+                logger.info(f"newly_traded_asset_names: {newly_traded_asset_names}")
+                logger.info(f"newly_traded_asset_ids: {newly_traded_asset_ids}")
+
                 logger.info(f"Newly traded asset_id count on {date_obj}: {len(newly_traded_asset_ids)}")
 
                 active_asset_ids = active_asset_ids.union(newly_traded_asset_ids)

@@ -12,7 +12,7 @@ models:
         data_type: string
         description: ""
         tests:
-          - dbt_utils.relationships:
+          - relationships:
               to: ref('stg_assets')
               field: asset_name
 
@@ -78,3 +78,18 @@ models:
       - name: currency
         data_type: string
         description: ""
+
+  - name: stg_balance_manual
+    description: "Manual balance adjustments"
+    columns:
+      - name: asset_name
+        description: "Name of the asset"
+
+      - name: date
+        description: "Date of the manual update"
+
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - asset_name
+            - date

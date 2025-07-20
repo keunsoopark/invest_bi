@@ -48,7 +48,7 @@ def ingest_transactions(request):
                         CAST(date AS STRING), 
                         TRIM(asset_name), 
                         FORMAT('%.2f', price),
-                        CAST(amounts AS STRING)
+                        FORMAT('%.2f', amounts)
                     ) AS hash_key,
                     version
                 FROM `{table_id}`
@@ -60,7 +60,7 @@ def ingest_transactions(request):
             parsed_date = datetime.strptime(r["date"], "%Y/%m/%d").date().isoformat()
             parsed_asset_name = _normalize(r.get("asset_name"))
             parsed_price = f"{r['price']:.2f}"
-            parsed_amounts = str(r["amounts"])
+            parsed_amounts = f"{r['amounts']:.2f}"
             key = f"{parsed_date}{parsed_asset_name}{parsed_price}{parsed_amounts}"
 
             version = _normalize(r.get("version"))
@@ -71,7 +71,7 @@ def ingest_transactions(request):
                     "asset_id": _normalize(r.get("asset_id")),
                     "price": float(r["price"]),
                     "currency": _normalize(r["currency"]),
-                    "amounts": int(r["amounts"]),
+                    "amounts": float(r["amounts"]),
                     "strategy_name": _normalize(r["strategy_name"]),
                     "strategy_details": _normalize(r.get("strategy_details")),
                     "version": int(version) if version is not None else None
@@ -89,7 +89,7 @@ def ingest_transactions(request):
                 bigquery.SchemaField("asset_id", "STRING"),
                 bigquery.SchemaField("price", "FLOAT"),
                 bigquery.SchemaField("currency", "STRING"),
-                bigquery.SchemaField("amounts", "INT64"),
+                bigquery.SchemaField("amounts", "FLOAT"),
                 bigquery.SchemaField("strategy_name", "STRING"),
                 bigquery.SchemaField("strategy_details", "STRING"),
                 bigquery.SchemaField("version", "INT64"),

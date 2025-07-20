@@ -5,19 +5,20 @@ import time
 API_URL = "https://europe-north1-xnwk-462111.cloudfunctions.net/asset_prices_daily"
 
 # Date range
-start_date = datetime.date(2024, 6, 30)
-end_date = datetime.date(2025, 2, 27)
-asset_ids = ["QQQ"]
+start_date = datetime.date(2025, 7, 9)
+end_date = datetime.date(2025, 7, 18)
+# asset_ids = ["115310.KQ", "004700.KS"]
+# asset_ids = ["0P0000K20Z.IR", "0P00000GP8.IR", "0P0000HNUP.IR", "0P00018J0O.IR", "0P00016TML.IR", "0P00000MY5.IR", "0P00000O8G.IR"]
 
 # Loop through each date
 current_date = start_date
 last_successful_date = None
 
 while current_date <= end_date:
-    payload = {
-        "date": current_date.isoformat(),
-        "asset_ids": asset_ids
-    }
+    payload = {"date": current_date.isoformat()}
+
+    if "asset_ids" in locals():
+        payload["asset_ids"] = asset_ids
     print(f"Triggering API for {payload['date']}...")
 
     try:

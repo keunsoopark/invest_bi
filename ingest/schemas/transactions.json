@@ -31,9 +31,9 @@
   },
   {
     "name": "amounts",
-    "type": "INTEGER",
+    "type": "FLOAT",
     "mode": "REQUIRED",
-    "description": "e.g., 10"
+    "description": "e.g., 10. It is float, not integer, to support fractional shares"
   },
   {
     "name": "strategy_name",

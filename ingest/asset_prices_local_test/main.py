@@ -4,8 +4,8 @@ import pandas as pd
 
 
 def main():
-    asset_id = "0P00000MY5.IR"
-    candidate_date = datetime.strptime("2025-04-04", "%Y-%m-%d").date()
+    asset_id = "226950.KQ"
+    candidate_date = datetime.strptime("2025-07-09", "%Y-%m-%d").date()
 
     ticker = yf.Ticker(asset_id)
     hist = ticker.history(start=str(candidate_date), end=str(candidate_date + timedelta(days=1)))
