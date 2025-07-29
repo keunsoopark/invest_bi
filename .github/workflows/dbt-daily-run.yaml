@@ -34,3 +34,8 @@ jobs:
         run: dbt run --profiles-dir ./profiles
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ./gcp_key.json
+
+      - name: dbt test
+        run: dbt test --profiles-dir ./profiles
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ./gcp_key.json
