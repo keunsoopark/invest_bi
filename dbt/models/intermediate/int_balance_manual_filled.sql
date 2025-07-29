@@ -5,7 +5,13 @@
   )
 }}
 
-WITH source_with_lookback AS (
+
+WITH max_date_cte AS (
+	SELECT MAX(date) AS max_date
+	FROM {{ this }}
+),
+
+source_with_lookback AS (
   SELECT
     asset_name,
     asset_id,
@@ -15,7 +21,8 @@ WITH source_with_lookback AS (
   FROM {{ ref('stg_balance_manual') }}
 
   {% if is_incremental() %}
-  WHERE date > (SELECT MAX(date) FROM {{ this }})
+  WHERE
+    date > (SELECT max_date FROM max_date_cte)
 
   UNION ALL
 
@@ -26,18 +33,9 @@ WITH source_with_lookback AS (
     currency,
     date
   FROM {{ this }}
-  WHERE date = (SELECT MAX(date) FROM {{ this }})
+  WHERE
+    date = (SELECT max_date FROM max_date_cte)
   {% endif %}
-),
-
-date_series AS (
-  SELECT calendar_date
-  FROM UNNEST(
-    GENERATE_DATE_ARRAY(
-      (SELECT MIN(date) FROM source_with_lookback),
-      CURRENT_DATE() - 1
-    )
-  ) AS calendar_date
 ),
 
 distinct_assets AS (
@@ -48,11 +46,13 @@ distinct_assets AS (
 
 date_asset_matrix AS (
   SELECT
-    d.calendar_date AS date,
-    a.asset_name
-  FROM date_series d
-  JOIN distinct_assets a
-    ON d.calendar_date >= a.initial_date
+    a.asset_name,
+    d AS date
+  FROM distinct_assets a
+  CROSS JOIN {{ generate_date_series(
+        "a.initial_date",
+        "CURRENT_DATE() - 1"
+    ) }} as d
 ),
 
 joined_data AS (
@@ -72,24 +72,11 @@ filled_values AS (
   SELECT
     date,
     asset_name,
+    {{ last_value_ffill('asset_id', 'date', 'asset_name') }} AS asset_id,
     COALESCE(
-      LAST_VALUE(asset_id IGNORE NULLS) OVER (
-        PARTITION BY asset_name ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-      ),
-      null
-    ) AS asset_id,
-    COALESCE(
-      LAST_VALUE(balance IGNORE NULLS) OVER (
-        PARTITION BY asset_name ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-      ),
-      0
+      {{ last_value_ffill('balance', 'date', 'asset_name') }}, 0
     ) AS balance,
-    COALESCE(
-      LAST_VALUE(currency IGNORE NULLS) OVER (
-        PARTITION BY asset_name ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-      ),
-      null
-    ) AS currency 
+    {{ last_value_ffill('currency', 'date', 'asset_name') }} AS currency
   FROM joined_data
 )
 

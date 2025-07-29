@@ -27,21 +27,9 @@ property_hist_distributed_cost as (
         loan_cost,
         interest_rate,
         felleskostnad,
-        LAST_VALUE(garbage_cost IGNORE NULLS) OVER (
-            PARTITION BY property_name
-            ORDER BY month_num
-            ROWS BETWEEN 5 PRECEDING AND CURRENT ROW
-        ) / 6 AS garbage_cost,
-        LAST_VALUE(forsikring_cost IGNORE NULLS) OVER (
-            PARTITION BY property_name
-            ORDER BY month_num
-            ROWS BETWEEN 11 PRECEDING AND CURRENT ROW
-        ) / 12 AS forsikring_cost,
-        LAST_VALUE(water_cost IGNORE NULLS) OVER (
-            PARTITION BY property_name
-            ORDER BY month_num
-            ROWS BETWEEN 3 PRECEDING AND CURRENT ROW
-        ) / 4 AS water_cost,
+        {{ last_value_ffill('garbage_cost', 'month_num', 'property_name', 'ROWS BETWEEN 5 PRECEDING AND CURRENT ROW') }} / 6 AS garbage_cost,
+        {{ last_value_ffill('forsikring_cost', 'month_num', 'property_name', 'ROWS BETWEEN 11 PRECEDING AND CURRENT ROW') }} / 12 AS forsikring_cost,
+        {{ last_value_ffill('water_cost', 'month_num', 'property_name', 'ROWS BETWEEN 3 PRECEDING AND CURRENT ROW') }} / 4 AS water_cost,
         electricity_cost,
         internet_cost,
         rent_mgmt_cost,

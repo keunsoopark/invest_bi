@@ -26,7 +26,6 @@ status_by_asset_groups_agg as(
         asset_main_group,
         purchase_sum,
         balance,
-        balance / SUM(balance) OVER (PARTITION BY date) * 100 AS balance_percentage,
         profit,
         case
             when purchase_sum = 0 then null

@@ -16,11 +16,7 @@ balance_manual_in_nok as (
         b.date,
         b.asset_name,
         b.asset_id,
-        case
-            when b.currency = 'NOK' then b.balance
-            when b.currency = 'USD' then b.balance * f.usdnok
-            when b.currency = 'KRW' then b.balance / f.nokkrw
-        end as balance,
+        {{ convert_to_nok('b.balance', 'b.currency', 'f') }} as balance,
         b.currency as original_currency
 
     from balance_manual as b

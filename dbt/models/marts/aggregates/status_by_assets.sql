@@ -21,13 +21,15 @@ status_by_assets as (
         end as purchase_amounts,
         SUM(purchase_sum) AS purchase_sum,
         case
-            {# If purchase_amounts = 999999, all balance of the same assets in fct_status is identical.
-                So avg(balance) here means any balance of an asset. 
-                This assumption is true for the same asset, but not true for the same strategy.
+            {# If purchase_amounts = 999999, the balance of an asset for a given date should be unique.
+                So it does not matter either we use avg(balance) or max(balance) or whatever agg.
+                And for these assets, there is a unique strategy_name and strategy_details as assumed in fct_status definition as well.
             #}
             when countif(purchase_amounts = 999999) > 0 then avg(balance)
             else SUM(balance)
         end as balance,
+        -- Same as balance. There should be 1 asset price for an asset for a given date.
+        avg(asset_price) as asset_price,
         CASE
             WHEN COUNTIF(purchase_amounts = 999999) > 0 THEN null
             ELSE SUM(purchase_sum) / NULLIF(SUM(purchase_amounts), 0)
@@ -36,6 +38,7 @@ status_by_assets as (
     group by
         date,
         asset_name
+
 ),
 
 status_by_assets_agg as (
@@ -52,6 +55,7 @@ status_by_assets_agg as (
             when ABS(balance) < 0.01 then null
             else (balance - purchase_sum) / purchase_sum * 100
         end as profit_percentage,
+        asset_price - average_purchase_price as unrealized_profit_percentage,
         average_purchase_price
     from status_by_assets
 
@@ -73,6 +77,7 @@ status_by_assets_agg_enriched as (
         sba.balance,
         sba.profit,
         sba.profit_percentage,
+        sba.unrealized_profit_percentage,
         sba.average_purchase_price,
         a.currency
     from status_by_assets_agg as sba

@@ -8,10 +8,10 @@ renamed as (
 
     select
         date,
-        name as property_name,
+        TRIM(name) as property_name,
         value as property_value,
         debt,
-        tenant,
+        TRIM(tenant) as tenant,
         COALESCE(monthly_rent, 0) AS monthly_rent,
         loan_payback,
         loan_cost,

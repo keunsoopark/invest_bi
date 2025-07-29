@@ -15,6 +15,14 @@ properties as (
     from {{ ref('stg_properties') }}
 ),
 
+property_hist_w_lags AS (
+    SELECT
+        *,
+        LAG(property_value) OVER (PARTITION BY property_name ORDER BY date) AS prev_month_value,
+        LAG(property_value, 12) OVER (PARTITION BY property_name ORDER BY date) AS prev_year_value
+    FROM property_hist
+),
+
 property_hist_agg as (
     select
         FORMAT_DATE('%Y-%m', date) AS month,
@@ -24,34 +32,12 @@ property_hist_agg as (
         debt,
         property_value - debt - {{ megler_cost }} as property_equity,
         debt / property_value * 100 as debt_ratio,
-        property_value - LAG(property_value) OVER (
-            PARTITION BY property_name
-            ORDER BY date
-        ) AS monthly_capital_gain,
-        SAFE_DIVIDE(
-            property_value - LAG(property_value) OVER (
-                PARTITION BY property_name
-                ORDER BY date
-            ),
-            LAG(property_value) OVER (
-                PARTITION BY property_name
-                ORDER BY date
-            )
-        ) * 100 AS monthly_capital_gain_ratio,
-        property_value - LAG(property_value, 12) OVER (
-            PARTITION BY property_name
-            ORDER BY date
-        ) AS yearly_capital_gain,
-        SAFE_DIVIDE(
-            property_value - LAG(property_value, 12) OVER (
-                PARTITION BY property_name
-                ORDER BY date
-            ),
-            LAG(property_value, 12) OVER (
-                PARTITION BY property_name
-                ORDER BY date
-            )
-        ) * 100 AS yearly_capital_gain_ratio,
+
+        property_value - prev_month_value AS monthly_capital_gain,
+        SAFE_DIVIDE(property_value - prev_month_value, prev_month_value) * 100 AS monthly_capital_gain_ratio,
+        property_value - prev_year_value AS yearly_capital_gain,
+        SAFE_DIVIDE(property_value - prev_year_value, prev_year_value) * 100 AS yearly_capital_gain_ratio,
+
         tenant,
         monthly_rent,
         loan_payback,
@@ -72,7 +58,7 @@ property_hist_agg as (
         monthly_rent - (loan_cost + felleskostnad + garbage_cost + forsikring_cost + electricity_cost + internet_cost + rent_mgmt_cost + depreciation_cost) as rent_net_income,
         monthly_rent - (loan_payback + loan_cost + felleskostnad + garbage_cost + forsikring_cost + electricity_cost + internet_cost + rent_mgmt_cost + depreciation_cost) as total_cashflow,
         monthly_rent * 12 / property_value * 100 as rent_nominal_yield
-    from property_hist
+    from property_hist_w_lags
 ),
 
 property_hist_agg2 as (

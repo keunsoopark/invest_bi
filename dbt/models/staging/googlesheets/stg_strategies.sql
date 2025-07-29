@@ -7,7 +7,7 @@ with source as (
 renamed as (
 
     select
-        name as strategy_name
+        TRIM(name) as strategy_name
 
     from source
 

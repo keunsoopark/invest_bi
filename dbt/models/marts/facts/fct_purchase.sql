@@ -24,17 +24,17 @@ first_txn_date AS (
     GROUP BY asset_name, strategy_name, strategy_details
 ),
 
-date_range AS (
+date_matrix AS (
     SELECT
         a.asset_name,
         a.strategy_name,
         a.strategy_details,
         d AS date
     FROM first_txn_date a
-    CROSS JOIN UNNEST(GENERATE_DATE_ARRAY(
-        a.min_date,
-        CURRENT_DATE() - 1
-    )) AS d
+    CROSS JOIN {{ generate_date_series(
+        "a.min_date",
+        "CURRENT_DATE() - 1"
+    ) }} as d
 ),
 
 daily_transactions AS (
@@ -57,21 +57,20 @@ daily_transactions AS (
 
 transaction_daily_filled AS (
     SELECT
-        dr.date,
-        dr.asset_name,
-        dr.strategy_name,
-        dr.strategy_details,
+        dm.date,
+        dm.asset_name,
+        dm.strategy_name,
+        dm.strategy_details,
         txn.amounts,
         txn.purchase_sum
-    FROM date_range dr
+    FROM date_matrix dm
     LEFT JOIN daily_transactions txn
-        ON dr.date = txn.date
-        AND dr.asset_name = txn.asset_name
-        AND dr.strategy_name = txn.strategy_name
-        AND COALESCE(dr.strategy_details, '') = COALESCE(txn.strategy_details, '')
+        ON dm.date = txn.date
+        AND dm.asset_name = txn.asset_name
+        AND dm.strategy_name = txn.strategy_name
+        AND COALESCE(dm.strategy_details, '') = COALESCE(txn.strategy_details, '')
 ),
 
--- Track whether 999999 occurred, and compute running sums
 purchase_daily_sum_temp AS (
     SELECT
         date,
@@ -79,15 +78,14 @@ purchase_daily_sum_temp AS (
         strategy_name,
         strategy_details,
 
+        -- Tracks if 999999 ever occurred so far (cumulative)
         MAX(CASE WHEN amounts = 999999 THEN 1 ELSE 0 END) OVER (
             PARTITION BY asset_name, strategy_name, strategy_details
             ORDER BY date
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
         ) AS has_infinite_flag,
 
-        SUM(
-            CASE WHEN amounts IS NULL OR amounts = 999999 THEN 0 ELSE amounts END
-        ) OVER (
+        SUM(CASE WHEN amounts IS NULL OR amounts = 999999 THEN 0 ELSE amounts END) OVER (
             PARTITION BY asset_name, strategy_name, strategy_details
             ORDER BY date
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW

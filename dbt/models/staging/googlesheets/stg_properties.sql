@@ -7,8 +7,8 @@ with source as (
 renamed as (
 
     select
-        name as property_name,
-        location as property_location,
+        TRIM(name) as property_name,
+        TRIM(location) as property_location,
         p_rom,
         construction_year,
         soverom,

@@ -8,19 +8,19 @@ mu_statement as (
     from {{ ref('int_mu_statement') }}
 ),
 
-fct_balance as (
+fct_status as (
     select *
-    from {{ ref('fct_balance') }}
+    from {{ ref('fct_status') }}
 ),
 
-fct_balance_selected AS (
+fct_status_selected AS (
     SELECT
         date,
         SUM(CASE WHEN asset_name IN ('USDT', 'SGOV') THEN balance ELSE 0 END) AS usd_cash,
         SUM(CASE WHEN asset_name = 'crypto' THEN balance ELSE 0 END) AS crypto,
         SUM(CASE WHEN asset_name = '김프 짤짤이' THEN balance ELSE 0 END) AS no_invest_ready_balance,
         SUM(CASE WHEN asset_name = 'KRW현금' THEN balance ELSE 0 END) AS krw_cash
-    FROM fct_balance
+    FROM fct_status
     GROUP BY date
 ),
 
@@ -41,7 +41,7 @@ private_statement_enriched as (
         ps.no_debit_spend + ps.no_credit_spend + ps.kr_debit_spend as personal_spending
     from private_statement ps
     left join mu_statement mu on ps.month = mu.month
-    left join fct_balance_selected f on ps.month_end_date = f.date
+    left join fct_status_selected f on ps.month_end_date = f.date
 ),
 
 private_statement_agg as (

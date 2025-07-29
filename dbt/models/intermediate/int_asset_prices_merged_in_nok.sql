@@ -43,11 +43,7 @@ asset_prices_merged_in_nok as (
         a.date,
         a.asset_name,
         a.asset_id,
-        case
-            when a.currency = 'NOK' then a.price
-            when a.currency = 'USD' then a.price * f.usdnok
-            when a.currency = 'KRW' then a.price / f.nokkrw
-        end as price,
+        {{ convert_to_nok('a.price', 'a.currency', 'f') }} as price,
         a.currency as original_currency
 
     from asset_prices_merged as a

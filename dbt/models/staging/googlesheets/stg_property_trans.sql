@@ -8,8 +8,8 @@ renamed as (
 
     select
         date,
-        name as property_name,
-        item,
+        TRIM(name) as property_name,
+        TRIM(item) as item,
         price
 
     from source
