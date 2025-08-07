@@ -1,0 +1,8 @@
+[
+  {
+    "name": "name",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "e.g., 정적자산배분"
+  }
+]

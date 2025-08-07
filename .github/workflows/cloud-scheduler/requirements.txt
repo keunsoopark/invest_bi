@@ -1,0 +1,4 @@
+requests
+PyJWT
+google-cloud-secret-manager
+functions-framework

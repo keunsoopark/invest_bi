@@ -70,6 +70,13 @@ gcloud functions deploy asset_prices_daily \
 Deployed function: https://europe-north1-xnwk-462111.cloudfunctions.net/asset_prices_daily
 
 
+## 새로운 종목 추가시
+
+transaction ingest pipeline 한번 돌리고  
+`dbt run -s +fct_purchase --full-refresh` 한번 돌려줘라.  
+그래야 다음번 asset price ingest pipeline 이 새 종목을 인식하고 얘 가격 정보를 불러온다.
+
+
 ## dbt
 
 ### Useful commands

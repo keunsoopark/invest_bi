@@ -44,23 +44,15 @@ def asset_prices_daily(request):
             date_obj = (datetime.today() - timedelta(days=1)).date()
         logger.info(f"Processing asset prices for date: {date_obj}")
 
-        # Asset ids which are active in balance based on fct_status table
+        # Asset ids which are active in portfolio
         active_asset_ids_query = f"""
             select distinct asset_id
             from (
                 SELECT date, asset_id, sum(purchase_amounts) as total_purchase_amounts
-                FROM `{PROJECT_ID}.marts_facts.fct_status`
+                FROM `{PROJECT_ID}.marts_facts.fct_purchase_amounts`
                 group by date, asset_id)
             WHERE date = DATE('{date_obj.isoformat()}')
                 AND (total_purchase_amounts > 0 OR total_purchase_amounts != 999999)
-        """
-        # If there are new rows in transaction, which are not listed in fct_status table yet
-        # Since omitting asset_id in transactions is allowed, we need to get asset_id by joining with assets table.
-        # After adding new rows in transaction, run "dbt run -s +fct_purchase --full-refresh" first. And then run asset_price reader
-        newly_traded_asset_names_query = f"""
-            select distinct asset_name
-            from `{PROJECT_ID}.marts_facts.fct_purchase`
-            where date = DATE('{date_obj.isoformat()}')
         """
 
         # Read Google Sheets
@@ -76,7 +68,7 @@ def asset_prices_daily(request):
 
         # Fetch active asset_ids
         bq = bigquery.Client()
-        if request_json.get("asset_ids"):
+        if request_json and request_json.get("asset_ids"):
             active_asset_ids = set(request_json.get("asset_ids"))
             logger.info(f"Requested asset_id filter: {active_asset_ids}")
         else:
@@ -87,31 +79,13 @@ def asset_prices_daily(request):
                     if row["asset_id"]
                 }
                 logger.info(f"Active asset_id count on {date_obj}: {len(active_asset_ids)}")
-
-                newly_traded_asset_names = {
-                    row["asset_name"]
-                    for row in bq.query(newly_traded_asset_names_query).result()
-                    if row["asset_name"]
-                }
-                newly_traded_asset_ids = {
-                    row["asset_id"]
-                    for row in assets
-                    if row.get("asset_name") in newly_traded_asset_names and row.get("asset_id")
-                }
-
-                logger.info(f"newly_traded_asset_names: {newly_traded_asset_names}")
-                logger.info(f"newly_traded_asset_ids: {newly_traded_asset_ids}")
-
-                logger.info(f"Newly traded asset_id count on {date_obj}: {len(newly_traded_asset_ids)}")
-
-                active_asset_ids = active_asset_ids.union(newly_traded_asset_ids)
             except Exception:
                 logger.error("Failed to fetch excluded asset_ids:\n%s", traceback.format_exc())
                 return "Failed to fetch exclusion list", 500
 
         # Select active assets
         assets = [row for row in assets if row.get("asset_id") in active_asset_ids]
-        logger.info(f"Filtered asset count: {len(assets)}")
+        logger.info(f"Active asset count: {len(assets)}")
 
         # Preparing temp table for data loading
         try:

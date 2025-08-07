@@ -57,7 +57,16 @@ def ingest_transactions(request):
 
         new_or_updated_rows = []
         for r in rows:
-            parsed_date = datetime.strptime(r["date"], "%Y/%m/%d").date().isoformat()
+            date_str = _normalize(r.get("date"))
+            if not date_str:
+                logger.warning(f"Skipping row with missing date: {r}")
+                continue
+            try:
+                parsed_date = datetime.strptime(date_str, "%Y/%m/%d").date().isoformat()
+            except Exception as ex:
+                logger.error(f"Invalid date format in row: {r}. Error: {ex}")
+                continue
+
             parsed_asset_name = _normalize(r.get("asset_name"))
             parsed_price = f"{r['price']:.2f}"
             parsed_amounts = f"{r['amounts']:.2f}"

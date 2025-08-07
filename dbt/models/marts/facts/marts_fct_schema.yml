@@ -189,6 +189,8 @@ models:
 
   - name: fct_transactions
     description: This is in use for transaction view in Looker.
+  - name: fct_purchase_amounts
+    description: This calculates current purchase amounts only. This is needed for asset price caller to identify which assets are in active status in portfolio.
 
 sources:
   - name: marts_facts_test_fixtures
