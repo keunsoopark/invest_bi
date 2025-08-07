@@ -1,4 +1,5 @@
 requests
 PyJWT
+cryptography
 google-cloud-secret-manager
 functions-framework

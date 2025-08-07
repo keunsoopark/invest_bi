@@ -2,6 +2,7 @@ import requests
 import jwt
 import time
 import os
+import logging
 from google.cloud import secretmanager
 import functions_framework
 
@@ -11,14 +12,14 @@ INSTALLATION_ID = "79710160"
 REPO = "keunsoopark/invest_bi"
 REF = "main"
 
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 @functions_framework.http
 def trigger_github_action(request):
     try:
-        # These must be set as env vars
         workflow_id = os.environ["WORKFLOW_ID"]
-        # Read private key from the file that was mounted by Secret Manager
-        with open("/secrets/github-app-private-key", "r") as f:
-            PRIVATE_KEY = f.read()
+        private_key = os.environ["github-app-private-key"]
 
         # Step 1: JWT for GitHub App
         payload = {
@@ -26,7 +27,7 @@ def trigger_github_action(request):
             "exp": int(time.time()) + (10 * 60),
             "iss": APP_ID
         }
-        jwt_token = jwt.encode(payload, PRIVATE_KEY, algorithm="RS256")
+        jwt_token = jwt.encode(payload, private_key, algorithm="RS256")
 
         # Step 2: Get Installation Token
         headers = {"Authorization": f"Bearer {jwt_token}", "Accept": "application/vnd.github+json"}
