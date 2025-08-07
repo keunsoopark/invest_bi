@@ -1,4 +1,4 @@
-name: dbt daily update purchase amounts
+name: dbt update purchase amounts
 
 on:
   workflow_dispatch:

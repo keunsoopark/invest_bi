@@ -9,7 +9,7 @@ gcloud functions deploy dbt-run-gha \
   --source . \
   --entry-point trigger_github_action \
   --trigger-http \
-  --set-env-vars=WORKFLOW_ID=dbt-daily-run.yaml \
+  --set-env-vars=WORKFLOW_ID=dbt-run-all.yaml \
   --set-secrets="github-app-private-key=dbt-gha-github-app-key:latest" \
   --allow-unauthenticated
 ```
