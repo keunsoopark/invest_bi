@@ -13,3 +13,6 @@ __pycache__
 dbt/target/
 dbt/dbt_packages/
 dbt/logs/
+
+# wip
+models/**/*.py
