@@ -25,9 +25,7 @@ For using this, we need a custom Docker image. See /py_model for docker file.
 
 Useful commands:
 ```
-docker build -t europe-north1-docker.pkg.dev/xnwk-462111/dbt/python_model:v1 .
+docker buildx build --platform linux/amd64 -t europe-north1-docker.pkg.dev/xnwk-462111/dbt/python_model:v1 .
 gcloud auth configure-docker europe-north1-docker.pkg.dev
 docker push europe-north1-docker.pkg.dev/xnwk-462111/dbt/python_model:v1
-
 ```
-

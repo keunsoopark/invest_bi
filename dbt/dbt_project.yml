@@ -16,6 +16,7 @@ clean-targets:
 
 models:
   invest_bi:
+    submission_method: bigframes
     +materialized: view
     +persist_docs:
       relation: true

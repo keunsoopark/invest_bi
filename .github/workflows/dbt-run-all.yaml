@@ -37,3 +37,17 @@ jobs:
         run: dbt test --profiles-dir ./profiles
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ./gcp_key.json
+
+      - name: Notify Slack on failure
+        if: ${{ failure() }}
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-message: |
+            ❌ *dbt run all* failed
+            • Repo: ${{ github.repository }}
+            • Workflow: ${{ github.workflow }} / Job: ${{ github.job }}
+            • Run: <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Open logs>
+            • Commit: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
