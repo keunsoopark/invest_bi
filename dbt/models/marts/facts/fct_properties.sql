@@ -118,8 +118,8 @@ property_monthly_status as (
         -- minus in transactions are plus in cost
         total_cost - transactions as total_cost,
         total_cash_outflow - transactions as total_cash_outflow,
-        rent_net_income - transactions as rent_net_income,
-        total_cashflow - transactions as total_cashflow,
+        rent_net_income + transactions as rent_net_income,
+        total_cashflow + transactions as total_cashflow,
         rent_nominal_yield,
         rent_net_yield,
         rent_nominal_equity_yield,

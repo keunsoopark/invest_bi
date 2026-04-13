@@ -33,6 +33,21 @@ ASSET_PRICES_SCHEMA = [
     bigquery.SchemaField("currency", "STRING")
 ]
 
+# Asset IDs with delayed data publish (e.g., KLP funds)
+# These assets may not have D-1 data available in the morning, so we try D-2, D-3, etc.
+DELAYED_ASSET_IDS = {
+    "0P0000K20Z.IR",    # KLP STATSOBLIGASJON P
+    "0P00000GP8.IR",    # KLP AKSJENORGE AKTIV P
+    "0P0000HNUP.IR",    # KLP AKSJENORGE INDEKS P
+    "0P00018J0O.IR",    # KLP AKSJEUSA INDEKS P
+    "0P00016TML.IR",    # KLP AKSJEEUROPA INDEKS P
+    "0P00000MY5.IR",    # KLP OBLIGASJON 1 ÅR P
+    "0P00000O8G.IR",    # KLP OBLIGASJON 3 ÅR P
+    "0P00017YPU.IR",    # KLP AksjeAsia Indeks P
+    "0P0000TJ5D.IR",    # KLP AksjeFremvoksende Markeder Indeks P
+    "0P0001BWAR.IR"     # KLP AksjeGlobal Small Cap Indeks P
+}
+
 @functions_framework.http
 def asset_prices_daily(request):
     try:
@@ -100,6 +115,8 @@ def asset_prices_daily(request):
         # Fetch prices
         total_requested = 0
         total_inserted = 0
+        MAX_FALLBACK_DAYS = 3   # Yesterday´s KLP price data started not to be available today morning since late 2025. So we get D-2 data if data price is not available.
+
         for i in range(0, len(assets), BATCH_SIZE):
             batch = assets[i:i + BATCH_SIZE]
             
@@ -113,28 +130,39 @@ def asset_prices_daily(request):
                     continue
 
                 price = None
-                try:
-                    ticker = yf.Ticker(asset_id)
-                    hist = ticker.history(
-                        start=str(date_obj),
-                        end=str(date_obj + timedelta(days=1))
-                    )
-                    total_requested += 1
-                    if not hist.empty:
-                        data_date = hist.index[0].date()
-                        close_price = hist["Close"].iloc[0]
-                        if not pd.isna(close_price):
-                            price = round(float(close_price), 2)
-                            rows_to_insert.append({
-                                "date": data_date.isoformat(),
-                                "asset_name": asset_name,
-                                "asset_id": asset_id,
-                                "price": price,
-                                "currency": currency
-                            })
-                            total_inserted += 1
-                except Exception as e:
-                    logger.warning(f"Error fetching price for {asset_id} on {date_obj}: {e}")
+                total_requested += 1
+
+                # Delayed assets get multiple fallback attempts; others get 1 attempt only
+                max_attempts = MAX_FALLBACK_DAYS if asset_id in DELAYED_ASSET_IDS else 1
+
+                for fallback in range(max_attempts):
+                    try_date = date_obj - timedelta(days=fallback)
+                    try:
+                        ticker = yf.Ticker(asset_id)
+                        hist = ticker.history(
+                            start=str(try_date),
+                            end=str(try_date + timedelta(days=1))
+                        )
+                        if not hist.empty:
+                            close_price = hist["Close"].iloc[0]
+                            if not pd.isna(close_price):
+                                price = round(float(close_price), 2)
+                                rows_to_insert.append({
+                                    "date": date_obj.isoformat(),   # Always use the target date, not date from API call
+                                    "asset_name": asset_name,
+                                    "asset_id": asset_id,
+                                    "price": price,
+                                    "currency": currency
+                                })
+                                total_inserted += 1
+                                if fallback > 0:
+                                    logger.info(f"Fallback D-{fallback}: used {try_date} price for {asset_id}")
+                                break  # Successfully got price, no need for further fallback
+                    except Exception as e:
+                        logger.warning(f"Error fetching price for {asset_id} on {date_obj}: {e}")
+
+                if price is None:
+                    logger.warning(f"No price found for {asset_id} (tried {max_attempts} day(s))")
 
             if rows_to_insert:
                 # Load data into temp table

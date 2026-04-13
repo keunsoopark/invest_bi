@@ -3,12 +3,16 @@ version: 2
 models:
   - name: status_by_assets
     description: Asset status including purchase_sum, balance, and profit
+    columns:
+      - name: profit
+        tests:
+          - not_null
 
   - name: status_by_asset_groups
     description: Asset status including purchase_sum, balance, and profit
     tests:
       - dbt_utils.expression_is_true:
-          expression: ABS(profit - (balance - purchase_sum)) <= 1
-
+          arguments:
+            expression: ABS(profit - (balance - purchase_sum)) <= 1
   - name: status_by_strategies
     description: Difficult to calculate unrealized profit cuz it is difficult to calculate purchase_amounts per strategy.

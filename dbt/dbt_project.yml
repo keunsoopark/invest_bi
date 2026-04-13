@@ -10,13 +10,12 @@ seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
-clean-targets: 
+clean-targets:
   - "target"
   - "dbt_packages"
 
 models:
   invest_bi:
-    submission_method: bigframes
     +materialized: view
     +persist_docs:
       relation: true
@@ -28,6 +27,9 @@ models:
 
     marts:
       +materialized: table
-      
+
       facts:
         +materialized: table
+    +submission_method: bigframes
+flags:
+  require_generic_test_arguments_property: true

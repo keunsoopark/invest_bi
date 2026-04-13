@@ -28,8 +28,8 @@ models:
         description: Total number of units held for the asset in the strategy.
         tests:
           - dbt_utils.expression_is_true:
+              arguments:
                 expression: '>= -0.0001'
-
       - name: purchase_sum
         description: Total cost of the purchase in original currency.
 
@@ -37,8 +37,8 @@ models:
         description: Current market value of the purchase in NOK.
         tests:
           - dbt_utils.expression_is_true:
+              arguments:
                 expression: '>= -10'
-
       - name: average_purchase_price
         description: Average purchase price per unit in NOK, if available.
 
@@ -48,11 +48,12 @@ models:
 
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - date
-            - asset_name
-            - strategy_name
-            - strategy_details
+          arguments:
+            combination_of_columns:
+              - date
+              - asset_name
+              - strategy_name
+              - strategy_details
 
   - name: fct_properties
     columns:

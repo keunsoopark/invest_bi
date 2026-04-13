@@ -17,7 +17,6 @@ status_asset_groups_with_month_end_date as (
     SELECT
         date,
         LAST_DAY(date, MONTH) AS month_end_date,
-        -- CAST(DATE_SUB(DATE_TRUNC(date, MONTH) + INTERVAL 1 MONTH, INTERVAL 1 DAY) AS DATE) AS month_end_date,
         asset_main_group,
         purchase_sum,
         balance,

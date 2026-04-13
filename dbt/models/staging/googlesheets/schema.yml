@@ -13,9 +13,9 @@ models:
         description: ""
         tests:
           - relationships:
-              to: ref('stg_assets')
-              field: asset_name
-
+              arguments:
+                to: ref('stg_assets')
+                field: asset_name
       - name: asset_id
         data_type: string
         description: ""
@@ -90,6 +90,7 @@ models:
 
     tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            - asset_name
-            - date
+          arguments:
+            combination_of_columns:
+              - asset_name
+              - date
