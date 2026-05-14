@@ -101,6 +101,9 @@ models:
         data_type: float64
       - name: depreciation_cost
         data_type: float64
+      - name: eiendomsskatt_bolig
+        data_type: float64
+        description: 부동산세 (노르웨이 주거용). 6개월마다 부과되며 월별로 균등 배분
       - name: total_cost
         data_type: float64
         description: 총 비용. 대출 이자 비용 + 관리비 + 감가상각

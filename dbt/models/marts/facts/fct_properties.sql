@@ -52,11 +52,12 @@ property_hist_agg as (
         internet_cost,
         rent_mgmt_cost,
         depreciation_cost,
+        eiendomsskatt_bolig,
         -- water cost is not considered as my cost, cuz it is paid by the tenant
-        loan_cost + felleskostnad + garbage_cost + forsikring_cost + electricity_cost + internet_cost + rent_mgmt_cost + depreciation_cost as total_cost,
-        loan_payback + loan_cost + felleskostnad + garbage_cost + forsikring_cost + electricity_cost + internet_cost + rent_mgmt_cost + depreciation_cost as total_cash_outflow,
-        monthly_rent - (loan_cost + felleskostnad + garbage_cost + forsikring_cost + electricity_cost + internet_cost + rent_mgmt_cost + depreciation_cost) as rent_net_income,
-        monthly_rent - (loan_payback + loan_cost + felleskostnad + garbage_cost + forsikring_cost + electricity_cost + internet_cost + rent_mgmt_cost + depreciation_cost) as total_cashflow,
+        loan_cost + felleskostnad + garbage_cost + forsikring_cost + electricity_cost + internet_cost + rent_mgmt_cost + depreciation_cost + eiendomsskatt_bolig as total_cost,
+        loan_payback + loan_cost + felleskostnad + garbage_cost + forsikring_cost + electricity_cost + internet_cost + rent_mgmt_cost + depreciation_cost + eiendomsskatt_bolig as total_cash_outflow,
+        monthly_rent - (loan_cost + felleskostnad + garbage_cost + forsikring_cost + electricity_cost + internet_cost + rent_mgmt_cost + depreciation_cost + eiendomsskatt_bolig) as rent_net_income,
+        monthly_rent - (loan_payback + loan_cost + felleskostnad + garbage_cost + forsikring_cost + electricity_cost + internet_cost + rent_mgmt_cost + depreciation_cost + eiendomsskatt_bolig) as total_cashflow,
         monthly_rent * 12 / property_value * 100 as rent_nominal_yield
     from property_hist_w_lags
 ),
@@ -115,6 +116,7 @@ property_monthly_status as (
         internet_cost,
         rent_mgmt_cost,
         depreciation_cost,
+        eiendomsskatt_bolig,
         -- minus in transactions are plus in cost
         total_cost - transactions as total_cost,
         total_cash_outflow - transactions as total_cash_outflow,

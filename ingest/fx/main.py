@@ -27,6 +27,7 @@ def fx_daily(request):
         if 'USD' in rates and 'NOK' in rates and 'KRW' in rates:
             usd_nok = (1 / rates['USD']) * rates['NOK']
             nok_krw = (1 / rates['NOK']) * rates['KRW']
+            eur_nok = rates['NOK']
 
             bq = bigquery.Client()
             table_ref = f"{PROJECT_ID}.{DATASET_NAME}.{TABLE_NAME}"
@@ -35,13 +36,15 @@ def fx_daily(request):
             row = [{
                 "date": date,
                 "USDNOK": usd_nok,
-                "NOKKRW": nok_krw
+                "NOKKRW": nok_krw,
+                "EURNOK": eur_nok
             }]
 
             schema = [
                 bigquery.SchemaField("date", "DATE"),
                 bigquery.SchemaField("USDNOK", "FLOAT"),
-                bigquery.SchemaField("NOKKRW", "FLOAT")
+                bigquery.SchemaField("NOKKRW", "FLOAT"),
+                bigquery.SchemaField("EURNOK", "FLOAT")
             ]
 
             try:
@@ -65,9 +68,9 @@ def fx_daily(request):
                 USING `{temp_table_ref}` S
                 ON T.date = S.date
                 WHEN MATCHED THEN
-                  UPDATE SET T.USDNOK = S.USDNOK, T.NOKKRW = S.NOKKRW
+                  UPDATE SET T.USDNOK = S.USDNOK, T.NOKKRW = S.NOKKRW, T.EURNOK = S.EURNOK
                 WHEN NOT MATCHED THEN
-                  INSERT (date, USDNOK, NOKKRW) VALUES(S.date, S.USDNOK, S.NOKKRW)
+                  INSERT (date, USDNOK, NOKKRW, EURNOK) VALUES(S.date, S.USDNOK, S.NOKKRW, S.EURNOK)
             """
             bq.query(merge_sql).result()
             logger.info(f"Upserted FX data for {date}")

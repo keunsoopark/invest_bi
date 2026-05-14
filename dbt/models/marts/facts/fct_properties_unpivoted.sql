@@ -28,6 +28,7 @@ properties_unpivoted as (
             internet_cost,
             rent_mgmt_cost,
             depreciation_cost,
+            eiendomsskatt_bolig,
             total_cost,
             total_cash_outflow,
             rent_net_income,

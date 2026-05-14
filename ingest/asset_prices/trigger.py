@@ -5,10 +5,10 @@ import time
 API_URL = "https://europe-north1-xnwk-462111.cloudfunctions.net/asset_prices_daily"
 
 # Date range
-start_date = datetime.date(2026, 2, 20)
-end_date = datetime.date(2026, 3, 4)
-# asset_ids = ["364970.KS", "364980.KS"]
-asset_ids = ["0P0000K20Z.IR", "0P00000GP8.IR", "0P0000HNUP.IR", "0P00018J0O.IR", "0P00016TML.IR", "0P00000MY5.IR", "0P00000O8G.IR", "0P00017YPU.IR", "0P0000TJ5D.IR", "0P0001BWAR.IR"]
+start_date = datetime.date(2026, 4, 14)
+end_date = datetime.date(2026, 4, 18)
+asset_ids = ["0183J0.KS"]
+# asset_ids = ["0P0000K20Z.IR", "0P00000GP8.IR", "0P0000HNUP.IR", "0P00018J0O.IR", "0P00016TML.IR", "0P00000MY5.IR", "0P00000O8G.IR", "0P00017YPU.IR", "0P0000TJ5D.IR", "0P0001BWAR.IR"]
 
 # Loop through each date
 current_date = start_date

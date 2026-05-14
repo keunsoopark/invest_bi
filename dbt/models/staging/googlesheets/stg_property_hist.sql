@@ -23,7 +23,8 @@ renamed as (
         COALESCE(electricity_cost, 0) AS electricity_cost,
         COALESCE(internet_cost, 0) AS internet_cost,
         COALESCE(rent_mgmt_cost, 0) AS rent_mgmt_cost,
-        depreciation_cost
+        depreciation_cost,
+        eiendomsskatt_bolig
 
     from source
 

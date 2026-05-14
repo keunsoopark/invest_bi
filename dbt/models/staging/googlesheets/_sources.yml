@@ -103,6 +103,8 @@ sources:
             data_type: float64
           - name: depreciation_cost
             data_type: float64
+          - name: eiendomsskatt_bolig
+            data_type: float64
 
       - name: property_trans
         columns:

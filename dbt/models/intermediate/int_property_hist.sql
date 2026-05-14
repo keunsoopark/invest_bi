@@ -33,7 +33,8 @@ property_hist_distributed_cost as (
         electricity_cost,
         internet_cost,
         rent_mgmt_cost,
-        depreciation_cost
+        depreciation_cost,
+        {{ last_value_ffill('eiendomsskatt_bolig', 'month_num', 'property_name', 'ROWS BETWEEN 5 PRECEDING AND CURRENT ROW') }} / 6 AS eiendomsskatt_bolig
     from property_hist_distributed_cost_base
 ),
 
@@ -55,7 +56,8 @@ property_hist_distributed_cost_not_null as (
         electricity_cost,
         internet_cost,
         rent_mgmt_cost,
-        depreciation_cost
+        depreciation_cost,
+        COALESCE(eiendomsskatt_bolig, 0) AS eiendomsskatt_bolig
     from property_hist_distributed_cost
 )
 
