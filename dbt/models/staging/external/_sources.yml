@@ -14,6 +14,8 @@ sources:
             data_type: float64
             tests:
               - not_null
+          - name: eurnok
+            data_type: float64
           - name: nokkrw
             data_type: float64
             tests:

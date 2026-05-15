@@ -20,6 +20,7 @@ source_with_lookback AS (
 	SELECT
 		date,
 		usdnok,
+		eurnok,
 		nokkrw
 	FROM {{ ref('stg_fx') }}
 
@@ -34,6 +35,7 @@ source_with_lookback AS (
 	SELECT
 		date,
 		usdnok,
+		eurnok,
 		nokkrw
 	FROM {{ this }}
 	WHERE
@@ -57,6 +59,7 @@ joined_data AS (
 	SELECT
 		d.date,
 		s.usdnok,
+		s.eurnok,
 		s.nokkrw
 	FROM date_series AS d
 	LEFT JOIN source_with_lookback AS s ON d.date = s.date
@@ -67,6 +70,7 @@ filled_values AS (
 	SELECT
 		date,
 		{{ last_value_ffill('usdnok', 'date') }} AS usdnok,
+		{{ last_value_ffill('eurnok', 'date') }} AS eurnok,
 		{{ last_value_ffill('nokkrw', 'date') }} AS nokkrw
 	FROM
 		joined_data

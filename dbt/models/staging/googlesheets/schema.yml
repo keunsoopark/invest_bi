@@ -2,15 +2,20 @@ version: 2
 
 models:
   - name: stg_transactions
-    description: ""
+    description: >
+      Raw asset transactions from Google Sheets. `price` is in `currency` (original, not NOK).
+      Sentinel: `amounts = 999999` means the asset is uncountable (crypto, cash, balance-only);
+      for these rows `price` carries the monetary value directly, not a per-unit price.
+      Downstream models (int_transactions_in_nok, fct_*) propagate this sentinel — filter out or
+      branch on `999999` before SUM/AVG.
     columns:
       - name: date
         data_type: date
-        description: ""
+        description: Transaction date.
 
       - name: asset_name
         data_type: string
-        description: ""
+        description: Asset name (FK to stg_assets).
         tests:
           - relationships:
               arguments:
@@ -18,75 +23,74 @@ models:
                 field: asset_name
       - name: asset_id
         data_type: string
-        description: ""
 
       - name: price
         data_type: float64
-        description: ""
+        description: Per-unit price in `currency`. For uncountable assets (amounts=999999), this is the total transaction value.
 
       - name: currency
         data_type: string
-        description: ""
+        description: Original currency code (USD, NOK, KRW, etc.).
 
       - name: amounts
         data_type: int64
-        description: ""
+        description: Units transacted. Sentinel `999999` = uncountable asset; treat as flag, not value.
 
       - name: strategy_name
         data_type: string
-        description: ""
 
       - name: strategy_details
         data_type: string
-        description: ""
 
       - name: transaction_version
         data_type: int64
-        description: ""
+        description: Version number for transaction revisions.
 
   - name: stg_assets
-    description: ""
+    description: Asset master dimension. One row per asset with classification (group, sector, region) and the asset's native currency.
     columns:
       - name: asset_name
         data_type: string
-        description: ""
+        description: Asset name (primary key for joins).
 
       - name: asset_id
         data_type: string
-        description: ""
+        description: Unique asset identifier (e.g. ticker).
 
       - name: main_group
         data_type: string
-        description: ""
+        description: Top-level asset class (e.g. equity, crypto, cash, property).
 
       - name: sub_group
         data_type: string
-        description: ""
+        description: Sub-classification under main_group.
 
       - name: sector
         data_type: string
-        description: ""
+        description: Sector classification (e.g. tech, energy).
 
       - name: region
         data_type: string
-        description: ""
+        description: Geographic region (e.g. US, Europe, Asia).
 
       - name: sub_region
         data_type: string
-        description: ""
+        description: Country or sub-region under `region`.
 
       - name: currency
         data_type: string
-        description: ""
+        description: Native currency of the asset (USD, NOK, KRW, etc.).
 
   - name: stg_balance_manual
-    description: "Manual balance adjustments"
+    description: >
+      Manual balance adjustments per (asset_name, date). `balance` is in `currency` (original).
+      Used for uncountable assets where unit-level transactions are not tracked.
     columns:
       - name: asset_name
-        description: "Name of the asset"
+        description: Name of the asset.
 
       - name: date
-        description: "Date of the manual update"
+        description: Date of the manual balance update.
 
     tests:
       - dbt_utils.unique_combination_of_columns:

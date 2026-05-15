@@ -2,17 +2,194 @@ version: 2
 
 models:
   - name: status_by_assets
-    description: Asset status including purchase_sum, balance, and profit
+    description: >
+      Asset-level investment status per (date, asset_name). Aggregates `fct_status` across strategies.
+      All monetary values (purchase_sum, balance, profit, asset_price, average_purchase_price) are in NOK.
+
+      Sentinel value: `purchase_amounts = 999999` flags an uncountable asset (crypto, cash, balance-only).
+      The model handles 999999 internally for balance/avg_price aggregation, but downstream queries should
+      still filter `purchase_amounts != 999999` when summing units across assets.
     columns:
+      - name: date
+      - name: asset_name
+      - name: asset_id
+      - name: main_group
+      - name: sub_group
+      - name: sector
+      - name: region
+      - name: sub_region
+      - name: purchase_amounts
+        description: Units held. `999999` = uncountable; exclude from SUM/AVG.
+      - name: purchase_sum
+        description: Cumulative purchase cost, in NOK.
+      - name: balance
+        description: Current market value, in NOK.
       - name: profit
+        description: balance - purchase_sum, in NOK.
         tests:
           - not_null
+      - name: profit_percentage
+        description: profit / purchase_sum * 100 (percent).
+      - name: unrealized_profit_percentage
+        description: (asset_price - average_purchase_price) per unit, in NOK. Null for uncountable assets.
+      - name: average_purchase_price
+        description: Average purchase price per unit, in NOK. Null when purchase_amounts = 999999.
+      - name: currency
+        description: Original currency code of the asset (for reference; values above are NOK).
 
   - name: status_by_asset_groups
-    description: Asset status including purchase_sum, balance, and profit
+    description: >
+      Asset-group-level investment status per (date, asset_main_group). All monetary values in NOK.
     tests:
       - dbt_utils.expression_is_true:
           arguments:
             expression: ABS(profit - (balance - purchase_sum)) <= 1
+    columns:
+      - name: date
+      - name: asset_main_group
+      - name: purchase_sum
+        description: Cumulative purchase cost across assets in the group, in NOK.
+      - name: balance
+        description: Current market value across assets in the group, in NOK.
+      - name: profit
+        description: balance - purchase_sum, in NOK.
+      - name: profit_percentage
+        description: profit / purchase_sum * 100 (percent).
+
   - name: status_by_strategies
-    description: Difficult to calculate unrealized profit cuz it is difficult to calculate purchase_amounts per strategy.
+    description: >
+      Strategy-level investment status per (date, strategy_name). All monetary values in NOK.
+      Note: unrealized profit is not computed here because per-strategy purchase_amounts is hard to define
+      across heterogeneous assets.
+    columns:
+      - name: date
+      - name: strategy_name
+      - name: purchase_sum
+        description: Cumulative purchase cost for the strategy, in NOK.
+      - name: balance
+        description: Current market value for the strategy, in NOK.
+      - name: profit
+        description: balance - purchase_sum, in NOK.
+      - name: profit_percentage
+        description: profit / purchase_sum * 100 (percent).
+
+  - name: status_by_strategy_details
+    description: >
+      Strategy-detail-level investment status per (date, strategy_details). All monetary values in NOK.
+    columns:
+      - name: date
+      - name: strategy_details
+      - name: purchase_sum
+        description: Cumulative purchase cost for the strategy detail, in NOK.
+      - name: balance
+        description: Current market value for the strategy detail, in NOK.
+      - name: profit
+        description: balance - purchase_sum, in NOK.
+      - name: profit_percentage
+        description: profit / purchase_sum * 100 (percent).
+
+  - name: status_monthly_overview
+    description: >
+      Month-end consolidated snapshot combining financial portfolio (status_by_asset_groups) and
+      real-estate (fct_properties). One row per month_end_date. Primary entry point for high-level
+      net-worth, profit, and ratio questions. All monetary values in NOK unless suffixed `_usd` / `_krw`.
+    columns:
+      - name: month
+        description: Month in `YYYY-MM` format.
+      - name: month_end_date
+        description: Last calendar day of the month.
+      - name: property_value
+        description: Total property market value across all properties, in NOK.
+      - name: property_debt
+        description: Total outstanding mortgage debt, in NOK.
+      - name: property_equity
+        description: Total property equity (value - debt - megler cost), in NOK.
+      - name: property_monthly_capital_gain
+        description: Sum of monthly capital gain across properties, in NOK.
+      - name: property_yearly_capital_gain
+        description: Sum of yearly capital gain (vs 12 months prior) across properties, in NOK.
+      - name: property_total_capital_gain
+        description: Cumulative capital gain since purchase across properties, in NOK.
+      - name: property_total_acc_profit
+        description: Cumulative property profit (rent_net_income + capital_gain), in NOK.
+      - name: finance_purchase
+        description: Total financial-asset purchase cost at month-end, in NOK.
+      - name: finance_balance
+        description: Total financial-asset market value at month-end, in NOK.
+      - name: finance_profit
+        description: finance_balance - finance_purchase, in NOK.
+      - name: finance_profit_rate
+        description: finance_profit / finance_purchase (ratio, not percent).
+      - name: finance_monthly_profit
+        description: Change in finance_profit vs previous month, in NOK.
+      - name: finance_yearly_profit
+        description: Change in finance_profit vs 12 months prior, in NOK.
+      - name: saving
+        description: Implied monthly saving into financial assets = ΔBalance - monthly_profit, in NOK.
+      - name: total_capital
+        description: property_value + finance_balance, in NOK.
+      - name: total_equity
+        description: property_equity + finance_balance, in NOK.
+      - name: total_debt_ratio
+        description: property_debt / total_capital (ratio).
+      - name: finance_capital_ratio
+        description: finance_balance / total_capital (ratio).
+      - name: property_capital_ratio
+        description: property_value / total_capital (ratio).
+      - name: finance_equity_ratio
+        description: finance_balance / total_equity (ratio).
+      - name: property_equity_ratio
+        description: property_equity / total_equity (ratio).
+      - name: finance_monthly_profit_ratio
+        description: finance_monthly_profit / finance_balance (ratio).
+      - name: finance_yearly_profit_ratio
+        description: finance_yearly_profit / finance_balance (ratio).
+      - name: property_monthly_profit_ratio
+        description: property_monthly_capital_gain / property_equity (ratio).
+      - name: property_monthly_profit_ratio_capital
+        description: property_monthly_capital_gain / property_value (ratio).
+      - name: property_yearly_profit_ratio
+        description: property_yearly_capital_gain / property_equity (ratio).
+      - name: property_yearly_profit_ratio_capital
+        description: property_yearly_capital_gain / property_value (ratio).
+      - name: total_monthly_profit
+        description: finance_monthly_profit + property_monthly_capital_gain, in NOK.
+      - name: total_monthly_profit_ratio
+        description: total_monthly_profit / total_equity (ratio).
+      - name: total_yearly_profit
+        description: finance_yearly_profit + property_yearly_capital_gain, in NOK.
+      - name: total_yearly_profit_ratio
+        description: total_yearly_profit / total_equity (ratio).
+      - name: total_profit
+        description: property_total_capital_gain + finance_profit, in NOK.
+      - name: total_equity_usd
+        description: total_equity converted to USD via month-end usdnok rate.
+      - name: total_equity_krw
+        description: total_equity converted to KRW via month-end nokkrw rate.
+
+  - name: status_monthly_assets
+    description: >
+      Month-end snapshot per (month_end_date, asset_name). Monthly granularity of `status_by_assets`,
+      with monthly_profit and monthly_profit_percentage derived from lag. All monetary values in NOK.
+    columns:
+      - name: month
+        description: Month in `YYYY-MM` format.
+      - name: month_end_date
+      - name: asset_name
+      - name: main_group
+      - name: sub_group
+      - name: region
+      - name: purchase_sum
+        description: Cumulative purchase cost at month-end, in NOK.
+      - name: balance
+        description: Market value at month-end, in NOK.
+      - name: accumulated_profit
+        description: balance - purchase_sum at month-end, in NOK.
+      - name: accumulated_profit_percentage
+        description: accumulated_profit / purchase_sum * 100 (percent).
+      - name: average_purchase_price
+        description: Average purchase price per unit, in NOK. Null when uncountable.
+      - name: monthly_profit
+        description: Change in accumulated_profit vs previous month, in NOK.
+      - name: monthly_profit_percentage
+        description: monthly_profit / avg(balance_t, balance_{t-1}) * 100 (percent).

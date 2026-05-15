@@ -12,6 +12,10 @@ models:
         data_type: float64
         description: ""
 
+      - name: eurnok
+        data_type: float64
+        description: ""
+
       - name: nokkrw
         data_type: float64
         description: ""

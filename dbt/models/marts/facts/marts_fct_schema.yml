@@ -3,7 +3,15 @@ version: 2
 models:
   - name: fct_status
     description: >
-      Investment status by asset and strategy, including purchase amounts, cost, current balance, and average purchase price.
+      Investment status per (date, asset_name, strategy_name, strategy_details) at daily granularity.
+      All monetary values (purchase_sum, balance, asset_price, average_purchase_price) are in NOK,
+      converted from the original currency via daily FX rates. `original_currency` carries the original
+      currency code for traceability.
+
+      Sentinel value: `purchase_amounts = 999999` flags an "uncountable" asset (e.g. crypto, cash, or
+      a balance-only asset that has no unit count). For these rows, `balance` carries the monetary value
+      directly and `purchase_amounts` MUST be filtered out before any SUM/AVG over amounts — otherwise
+      aggregates explode. To filter: `WHERE purchase_amounts != 999999`.
     columns:
       - name: date
         description: Date of the investment status record.
@@ -25,22 +33,31 @@ models:
         description: Additional details or identifier for the strategy.
 
       - name: purchase_amounts
-        description: Total number of units held for the asset in the strategy.
+        description: >
+          Total number of units held for the asset in the strategy.
+          Sentinel: `999999` means the asset is uncountable in units (crypto, cash, balance-only).
+          Always exclude `999999` from SUM/AVG aggregations — for these rows, refer to `balance` for value.
         tests:
           - dbt_utils.expression_is_true:
               arguments:
                 expression: '>= -0.0001'
       - name: purchase_sum
-        description: Total cost of the purchase in original currency.
+        description: Cumulative purchase cost (sum of price * amounts up to `date`), in NOK.
+
+      - name: asset_price
+        description: Asset unit price as of `date`, in NOK. Null for uncountable assets (purchase_amounts = 999999).
 
       - name: balance
-        description: Current market value of the purchase in NOK.
+        description: Current market value of the holding, in NOK.
         tests:
           - dbt_utils.expression_is_true:
               arguments:
                 expression: '>= -10'
       - name: average_purchase_price
-        description: Average purchase price per unit in NOK, if available.
+        description: Average purchase price per unit, in NOK. Null when purchase_amounts = 999999.
+
+      - name: original_currency
+        description: Original currency code of the asset (USD, NOK, KRW, etc.) before NOK conversion.
 
       - name: main_group
         tests:
@@ -56,145 +73,261 @@ models:
               - strategy_details
 
   - name: fct_properties
+    description: >
+      Monthly fact table for real-estate properties owned. One row per (month, property_name).
+      All monetary values are in NOK. Includes derived metrics for yield, cashflow, and capital gain.
     columns:
       - name: month
         data_type: string
+        description: Month in `YYYY-MM` format.
+      - name: month_end_date
+        data_type: date
+        description: Last calendar day of `month`.
       - name: property_name
         data_type: string
       - name: property_value
         data_type: float64
+        description: Property market value, in NOK.
       - name: debt
         data_type: float64
+        description: Outstanding mortgage debt, in NOK.
       - name: property_equity
         data_type: float64
-        description: 자본. 순자산
+        description: 자본. 순자산 = property_value - debt - megler_cost (NOK).
       - name: debt_ratio
         data_type: float64
-        description: 부채 비율
-      - name: capital_gain
+        description: 부채 비율 = debt / property_value * 100 (percent).
+      - name: monthly_capital_gain
         data_type: float64
-        description: 자본 이득. 자산 가치 증가
+        description: Capital gain vs previous month, in NOK.
+      - name: monthly_capital_gain_ratio
+        data_type: float64
+        description: Monthly capital gain as percent of previous month value.
+      - name: yearly_capital_gain
+        data_type: float64
+        description: Capital gain vs 12 months prior, in NOK.
+      - name: yearly_capital_gain_ratio
+        data_type: float64
+        description: Yearly capital gain as percent of value 12 months prior.
       - name: tenant
         data_type: string
       - name: monthly_rent
         data_type: float64
+        description: Monthly rent received, in NOK.
       - name: loan_payback
         data_type: float64
+        description: Monthly principal repayment, in NOK.
       - name: loan_cost
         data_type: float64
+        description: Monthly loan interest cost, in NOK.
       - name: loan_cashflow
         data_type: float64
-        description: 원리금 상환 + 이자 비용
+        description: 원리금 상환 + 이자 비용 = loan_payback + loan_cost (NOK).
+      - name: interest_rate
+        data_type: float64
+        description: Annualized interest rate at month-end (percent).
       - name: felleskostnad
         data_type: float64
+        description: HOA / common cost (Norwegian), monthly, in NOK.
       - name: garbage_cost
         data_type: float64
+        description: Garbage / waste fee, monthly amortized, in NOK.
       - name: forsikring_cost
         data_type: float64
+        description: Insurance cost, monthly amortized, in NOK.
       - name: water_cost
         data_type: float64
+        description: Water utility cost, monthly amortized, in NOK. Paid by tenant — not included in `total_cost`.
       - name: electricity_cost
         data_type: float64
+        description: Electricity cost, monthly, in NOK.
       - name: internet_cost
         data_type: float64
+        description: Internet cost, monthly, in NOK.
       - name: rent_mgmt_cost
         data_type: float64
+        description: Rent management fee, monthly, in NOK.
       - name: depreciation_cost
         data_type: float64
+        description: Depreciation, monthly, in NOK.
       - name: eiendomsskatt_bolig
         data_type: float64
-        description: 부동산세 (노르웨이 주거용). 6개월마다 부과되며 월별로 균등 배분
+        description: 부동산세 (노르웨이 주거용). 6개월마다 부과되며 월별로 균등 배분 (NOK).
       - name: total_cost
         data_type: float64
-        description: 총 비용. 대출 이자 비용 + 관리비 + 감가상각
+        description: 총 비용. 대출 이자 비용 + 관리비 + 감가상각 (NOK). Excludes loan_payback. Adjusted by transactions.
       - name: total_cash_outflow
         data_type: float64
-        description: 총 현금 유출. 대출 원리금 상환 + total_cost
+        description: 총 현금 유출 = 대출 원리금 상환 + total_cost (NOK).
       - name: rent_net_income
         data_type: float64
-        description: 순 임대 수익. 월세 - total_cost
+        description: 순 임대 수익 = monthly_rent - total_cost (NOK).
       - name: total_cashflow
         data_type: float64
-        description: 총 현금 흐름. 월세 - total_cash_outflow = 월세 - total_cost - 대출 원리금 상환
+        description: 총 현금 흐름 = monthly_rent - total_cash_outflow (NOK).
       - name: rent_nominal_yield
         data_type: float64
-        description: 명목 임대 수익률. 년세 / 집값
+        description: 명목 임대 수익률 = monthly_rent * 12 / property_value * 100 (percent).
       - name: rent_net_yield
         data_type: float64
-        description: 순 임대 수익률. rent_net_income * 12 / 집값
+        description: 순 임대 수익률 = rent_net_income * 12 / property_value * 100 (percent).
       - name: rent_nominal_equity_yield
         data_type: float64
-        description: 명목 자본 수익률. 년세 / 자본
+        description: 명목 자본 수익률 = monthly_rent * 12 / property_equity * 100 (percent).
       - name: rent_net_equity_yield
         data_type: float64
-        description: 순 자본 수익률. rent_net_income * 12 / 자본
+        description: 순 자본 수익률 = rent_net_income * 12 / property_equity * 100 (percent).
       - name: transactions
         data_type: float64
-        description: 한달에 이 집에 들어간 비용 총합. 추가로 번 돈있으면 그것도 여기에 들어감
+        description: 한달에 이 집에 들어간 비용 총합 (NOK). 추가로 번 돈 있으면 음수로 들어감.
+      - name: total_capital_gain
+        data_type: float64
+        description: Cumulative capital gain since purchase = property_value - purchase_price (NOK).
+      - name: total_debt_repayment
+        data_type: float64
+        description: Cumulative debt repaid since purchase = initial_debt - debt (NOK).
+      - name: total_debt_repayment_ratio
+        data_type: float64
+        description: Cumulative repayment as percent of initial debt.
+      - name: total_acc_profit
+        data_type: float64
+        description: Accumulated profit = cumulative rent_net_income + total_capital_gain (NOK).
 
   - name: fct_private_statement
-    description: ""
+    description: >
+      Monthly private + business financial statement consolidated for KP and MireUniverse (MU).
+      One row per month. All monetary values are in NOK (Korean balances converted via nokkrw FX).
     columns:
       - name: month
         data_type: string
-        description: ""
+        description: Month in `YYYY-MM` format.
 
       - name: month_end_date
         data_type: date
-        description: ""
+        description: Last calendar day of `month`.
 
       - name: reserve_balance
         data_type: float64
-        description: Balance in reserve account
+        description: Balance in reserve account (NOK).
 
       - name: public_investment_balance
         data_type: float64
-        description: Balance of publicly opened investment account via @litenvannmelon
+        description: Balance of publicly opened investment account via @litenvannmelon (NOK).
 
       - name: usd_cash
         data_type: float64
-        description: USD cash. Currently USDT + SGOV
+        description: USD cash balance (USDT + SGOV), in NOK.
 
       - name: crypto
         data_type: float64
-        description: Total crypto balance
+        description: Total crypto balance, in NOK.
 
       - name: no_invest_ready_balance
         data_type: float64
-        description: Investment ready balance in Norway. Currently 김프 짤짤이
+        description: Investment-ready balance in Norway. Currently 김프 짤짤이 (NOK).
 
       - name: korea_balance
         data_type: float64
-        description: Total balance in Korea. Sum of all accounts in Korea
+        description: Total balance held in Korean accounts, in NOK (converted from KRW via nokkrw).
 
       - name: krw_cash
         data_type: float64
-        description: KRW cash
+        description: KRW cash balance, in NOK.
 
       - name: loan_to_mu
         data_type: float64
-        description: Loan to MU from KP
+        description: Loan from KP to MU (NOK).
 
       - name: private_balance
         data_type: float64
-        description: Sum of all above. Total private balance of KP
+        description: Sum of all KP private balances above, in NOK.
 
       - name: total_mu_balance
         data_type: float64
-        description: Total balance of MireUniverse
+        description: Total balance of MireUniverse (operation + reserve + folkeinvestering + klp - debt_from_kp + debt_to_mp), in NOK.
 
       - name: business_operation_buffer
         data_type: float64
-        description: Business + KP operation buffer. Currently, 100 000 + MU operation + Loan from MU to MP
+        description: Business + KP operation buffer (NOK). Currently 100 000 + MU operation + MU→MP loan.
 
       - name: financial_invest_balance
         data_type: float64
-        description: Total investable balance = private_balance + total_mu_balance - business_operation_buffer
+        description: Total investable balance = private_balance + total_mu_balance - business_operation_buffer (NOK).
+
+      - name: personal_spending
+        data_type: float64
+        description: Monthly personal spending (no_debit + no_credit + kr_debit), in NOK.
 
   - name: fct_transactions
-    description: This is in use for transaction view in Looker.
+    description: >
+      All asset purchase/sale transactions, enriched with asset metadata.
+      All monetary values (`price`, `purchase`) are in NOK, converted from `original_currency` via daily FX.
+      Used by the transaction view in Looker.
+
+      Sentinel value: `amounts = 999999` flags an "uncountable" asset transaction (crypto, cash, balance-only).
+      For these rows, `price` carries the monetary delta directly (not a unit price) and `purchase = price`
+      (not `price * amounts`). NEVER multiply `price * amounts` blindly — use the `purchase` column, which
+      already handles the sentinel correctly.
+    columns:
+      - name: date
+        data_type: date
+      - name: asset_name
+        data_type: string
+      - name: asset_id
+        data_type: string
+      - name: price
+        data_type: float64
+        description: Per-unit price in NOK. For uncountable assets (amounts=999999), this is the total transaction value, not a unit price.
+      - name: original_currency
+        data_type: string
+        description: Original currency code (USD, NOK, KRW, etc.) before NOK conversion.
+      - name: amounts
+        data_type: int64
+        description: >
+          Number of units transacted. Sentinel: `999999` means uncountable — for these rows `price` holds
+          the monetary value directly. Always filter out or branch on `999999` before aggregating.
+      - name: strategy_name
+        data_type: string
+      - name: strategy_details
+        data_type: string
+      - name: asset_main_group
+        data_type: string
+      - name: asset_sub_group
+        data_type: string
+      - name: sector
+        data_type: string
+      - name: region
+        data_type: string
+      - name: sub_region
+        data_type: string
+      - name: purchase
+        data_type: float64
+        description: >
+          Transaction value in NOK. Equals `price * amounts` for countable assets, or `price` directly
+          when `amounts = 999999`. Use this column for monetary aggregations instead of recomputing.
+
   - name: fct_purchase_amounts
-    description: This calculates current purchase amounts only. This is needed for asset price caller to identify which assets are in active status in portfolio.
+    description: >
+      Daily cumulative purchase amounts (units held) per (asset_name, strategy_name, strategy_details).
+      Built primarily to feed the asset-price caller which needs to know which assets are currently active
+      in the portfolio.
+
+      Sentinel value: `purchase_amounts = 999999` means uncountable — the asset is tracked by balance,
+      not by units. Filter out `999999` before aggregating amounts.
+    columns:
+      - name: date
+        data_type: date
+      - name: asset_name
+        data_type: string
+      - name: asset_id
+        data_type: string
+      - name: strategy_name
+        data_type: string
+      - name: strategy_details
+        data_type: string
+      - name: purchase_amounts
+        data_type: int64
+        description: Cumulative units held up to `date`. Sentinel `999999` = uncountable asset; exclude from SUM/AVG.
 
 sources:
   - name: marts_facts_test_fixtures

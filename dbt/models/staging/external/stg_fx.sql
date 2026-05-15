@@ -9,6 +9,7 @@ renamed as (
     select
         date,
         usdnok,
+        eurnok,
         nokkrw
 
     from source
