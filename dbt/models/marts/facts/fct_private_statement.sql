@@ -36,7 +36,7 @@ private_statement_enriched as (
         ps.korea_balance,
         f.krw_cash,
         mu.debt_from_kp as loan_to_mu,
-        mu.operation_balance + mu.reserve_balance + mu.folkeinvestering_balance + mu.klp_balance - mu.debt_from_kp + mu.debt_to_mp as total_mu_balance,
+        mu.operation_balance + mu.reserve_balance + mu.folkeinvestering_balance + mu.klp_balance + mu.nordnet_balance - mu.debt_from_kp + mu.debt_to_mp as total_mu_balance,
         mu.business_operation_buffer,
         ps.no_debit_spend + ps.no_credit_spend + ps.kr_debit_spend as personal_spending
     from private_statement ps

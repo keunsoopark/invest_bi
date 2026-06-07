@@ -19,6 +19,7 @@ mu_statement as (
             'reserve balance' AS reserve_balance,
             'folkeinvestering balance' AS folkeinvestering_balance,
             'klp balance' AS klp_balance,
+            'nordnet balance' AS nordnet_balance,
             'debt from kp' AS debt_from_kp
         )
     )
@@ -32,6 +33,7 @@ mu_statement_enriched as (
         COALESCE(reserve_balance, 0) as reserve_balance,
         COALESCE(folkeinvestering_balance, 0) as folkeinvestering_balance,
         COALESCE(klp_balance, 0) as klp_balance,
+        COALESCE(nordnet_balance, 0) as nordnet_balance,
         COALESCE(debt_from_kp, 0) as debt_from_kp
     from mu_statement
 )

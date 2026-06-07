@@ -244,7 +244,7 @@ models:
 
       - name: total_mu_balance
         data_type: float64
-        description: Total balance of MireUniverse (operation + reserve + folkeinvestering + klp - debt_from_kp + debt_to_mp), in NOK.
+        description: Total balance of MireUniverse (operation + reserve + folkeinvestering + klp + nordnet - debt_from_kp + debt_to_mp), in NOK.
 
       - name: business_operation_buffer
         data_type: float64

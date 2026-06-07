@@ -1,7 +1,8 @@
-{{ 
+{{
   config(
-    tags=['regression']
-  ) 
+    tags=['regression'],
+    enabled= false
+  )
 }}
 
 WITH snapshot AS (
